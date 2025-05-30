@@ -2,7 +2,7 @@ pipeline {
     agent any
     
     tools {
-        maven 'Maven-3.9.0'
+        maven 'Maven'
         jdk 'JDK-11'
     }
     
@@ -11,19 +11,22 @@ pipeline {
         DOCKER_IMAGE = "user-service-ecommerce"
         DOCKER_TAG = "${BUILD_NUMBER}"
         MAVEN_OPTS = '-Dmaven.repo.local=/var/jenkins_home/.m2/repository'
-        JAVA_HOME = "${tool 'JDK-11'}"
-        PATH = "${env.JAVA_HOME}/bin:${env.PATH}"
     }
     
     stages {
         stage('Verify Java Version') {
             steps {
+                script {
+                    env.JAVA_HOME = tool 'JDK-11'
+                    env.PATH = "${env.JAVA_HOME}/bin:${env.PATH}"
+                }
                 echo 'Verifying Java version...'
                 sh 'echo "JAVA_HOME: $JAVA_HOME"'
                 sh 'echo "PATH: $PATH"'
                 sh 'which java'
-                sh 'java -version'
-                sh 'javac -version'
+                sh '$JAVA_HOME/bin/java -version'
+                sh '$JAVA_HOME/bin/javac -version'
+                sh 'mvn -version'
             }
         }
         
@@ -36,8 +39,13 @@ pipeline {
         
         stage('Build') {
             steps {
+                script {
+                    env.JAVA_HOME = tool 'JDK-11'
+                    env.PATH = "${env.JAVA_HOME}/bin:${env.PATH}"
+                }
                 echo 'Building the application...'
                 dir('user-service') {
+                    sh 'echo "Using JAVA_HOME: $JAVA_HOME"'
                     sh 'mvn clean compile -DskipTests'
                 }
             }
@@ -45,6 +53,10 @@ pipeline {
         
         stage('Test') {
             steps {
+                script {
+                    env.JAVA_HOME = tool 'JDK-11'
+                    env.PATH = "${env.JAVA_HOME}/bin:${env.PATH}"
+                }
                 echo 'Running tests...'
                 dir('user-service') {
                     sh 'mvn test'
@@ -62,6 +74,10 @@ pipeline {
         
         stage('Package') {
             steps {
+                script {
+                    env.JAVA_HOME = tool 'JDK-11'
+                    env.PATH = "${env.JAVA_HOME}/bin:${env.PATH}"
+                }
                 echo 'Packaging the application...'
                 dir('user-service') {
                     sh 'mvn package -DskipTests'
