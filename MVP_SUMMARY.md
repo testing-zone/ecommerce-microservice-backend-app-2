@@ -134,21 +134,3 @@
 El MVP está funcionando correctamente y listo para la siguiente fase del taller. Jenkins está configurado, el pipeline funciona, y tenemos pruebas unitarias básicas implementadas.
 
 **¿Siguiente paso?** Continuar con la expansión de pruebas o agregar más microservicios según las necesidades del taller. 
-
-## 🔧 Cambios en el Jenkinsfile
-
-```
-pipeline {
-    agent any
-    tools {
-        jdk 'JDK-11'
-    }
-    stages {
-        stage('Test Java') {
-            steps {
-                sh 'java -version'
-                sh 'javac -version'
-            }
-        }
-    }
-}
