@@ -2,7 +2,9 @@ version: '3.8'
 
 services:
   jenkins:
-    image: jenkins/jenkins:2.440.3-lts
+    build:
+      context: .
+      dockerfile: jenkins.Dockerfile
     container_name: jenkins-server
     ports:
       - "8081:8080"
@@ -17,26 +19,8 @@ services:
       - jenkins
     restart: unless-stopped
 
-  docker-in-docker:
-    image: docker:24.0.7-dind
-    container_name: jenkins-docker
-    privileged: true
-    networks:
-      jenkins:
-        aliases:
-          - docker
-    environment:
-      - DOCKER_TLS_CERTDIR=/certs
-    volumes:
-      - jenkins-docker-certs:/certs/client
-      - jenkins_home:/var/jenkins_home
-    ports:
-      - "2376:2376"
-    command: --storage-driver overlay2
-
 volumes:
   jenkins_home:
-  jenkins-docker-certs:
 
 networks:
   jenkins:
