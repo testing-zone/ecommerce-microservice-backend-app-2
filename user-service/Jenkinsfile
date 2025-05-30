@@ -1,0 +1,108 @@
+pipeline {
+    agent any
+    
+    tools {
+        maven 'Maven-3.9.0'
+        jdk 'JDK-11'
+    }
+    
+    environment {
+        PROJECT_VERSION = '0.1.0'
+        DOCKER_IMAGE = "user-service-ecommerce"
+        DOCKER_TAG = "${BUILD_NUMBER}"
+        MAVEN_OPTS = '-Dmaven.repo.local=/var/jenkins_home/.m2/repository'
+        JAVA_HOME = "${tool 'JDK-11'}"
+        PATH = "${env.JAVA_HOME}/bin:${env.PATH}"
+    }
+    
+    stages {
+        stage('Verify Java Version') {
+            steps {
+                echo 'Verifying Java version...'
+                sh 'echo "JAVA_HOME: $JAVA_HOME"'
+                sh 'echo "PATH: $PATH"'
+                sh 'which java'
+                sh 'java -version'
+                sh 'javac -version'
+            }
+        }
+        
+        stage('Checkout') {
+            steps {
+                echo 'Checking out source code...'
+                checkout scm
+            }
+        }
+        
+        stage('Build') {
+            steps {
+                echo 'Building the application...'
+                dir('user-service') {
+                    sh 'mvn clean compile -DskipTests'
+                }
+            }
+        }
+        
+        stage('Test') {
+            steps {
+                echo 'Running tests...'
+                dir('user-service') {
+                    sh 'mvn test'
+                }
+            }
+            post {
+                always {
+                    dir('user-service') {
+                        publishTestResults testResultsPattern: 'target/surefire-reports/*.xml'
+                        publishCoverage adapters: [jacocoAdapter('target/site/jacoco/jacoco.xml')], sourceFileResolver: sourceFiles('STORE_LAST_BUILD')
+                    }
+                }
+            }
+        }
+        
+        stage('Package') {
+            steps {
+                echo 'Packaging the application...'
+                dir('user-service') {
+                    sh 'mvn package -DskipTests'
+                }
+            }
+        }
+        
+        stage('Docker Build') {
+            steps {
+                echo 'Building Docker image...'
+                dir('user-service') {
+                    script {
+                        def dockerImage = docker.build("${DOCKER_IMAGE}:${DOCKER_TAG}")
+                        dockerImage.tag("${DOCKER_IMAGE}:latest")
+                    }
+                }
+            }
+        }
+        
+        stage('Archive Artifacts') {
+            steps {
+                dir('user-service') {
+                    archiveArtifacts artifacts: 'target/*.jar', allowEmptyArchive: false
+                }
+            }
+        }
+    }
+    
+    post {
+        always {
+            echo 'Pipeline completed.'
+            cleanWs()
+        }
+        success {
+            echo 'Pipeline succeeded!'
+        }
+        failure {
+            echo 'Pipeline failed!'
+        }
+        unstable {
+            echo 'Pipeline unstable!'
+        }
+    }
+} 
