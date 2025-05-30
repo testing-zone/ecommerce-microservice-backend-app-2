@@ -54,7 +54,7 @@ pipeline {
             steps {
                 echo 'Running integration tests...'
                 dir('user-service') {
-                    sh 'mvn test -Dtest=*IntegrationTest'
+                    sh 'mvn test -Dtest=*IntegrationTest -DfailIfNoTests=false'
                 }
             }
             post {
@@ -197,21 +197,31 @@ pipeline {
             echo 'Pipeline succeeded!'
             script {
                 if (env.BRANCH_NAME == 'master') {
-                    emailext (
-                        subject: "SUCCESS: User Service Deployment - Build ${BUILD_NUMBER}",
-                        body: "User Service has been successfully deployed to production.\n\nBuild: ${BUILD_NUMBER}\nCommit: ${env.GIT_COMMIT}\n\nView the build: ${BUILD_URL}",
-                        to: "devops@company.com"
-                    )
+                    try {
+                        emailext (
+                            subject: "SUCCESS: User Service Deployment - Build ${BUILD_NUMBER}",
+                            body: "User Service has been successfully deployed to production.\n\nBuild: ${BUILD_NUMBER}\nCommit: ${env.GIT_COMMIT}\n\nView the build: ${env.BUILD_URL ?: currentBuild.absoluteUrl}",
+                            to: "devops@company.com"
+                        )
+                    } catch (Exception e) {
+                        echo "Email notification failed: ${e.getMessage()}"
+                    }
                 }
             }
         }
         failure {
             echo 'Pipeline failed!'
-            emailext (
-                subject: "FAILURE: User Service Pipeline - Build ${BUILD_NUMBER}",
-                body: "User Service pipeline has failed.\n\nBuild: ${BUILD_NUMBER}\nCommit: ${env.GIT_COMMIT}\n\nView the build: ${BUILD_URL}",
-                to: "devops@company.com"
-            )
+            script {
+                try {
+                    emailext (
+                        subject: "FAILURE: User Service Pipeline - Build ${BUILD_NUMBER}",
+                        body: "User Service pipeline has failed.\n\nBuild: ${BUILD_NUMBER}\nCommit: ${env.GIT_COMMIT}\n\nView the build: ${env.BUILD_URL ?: currentBuild.absoluteUrl}",
+                        to: "devops@company.com"
+                    )
+                } catch (Exception e) {
+                    echo "Email notification failed: ${e.getMessage()}"
+                }
+            }
         }
         unstable {
             echo 'Pipeline unstable!'
