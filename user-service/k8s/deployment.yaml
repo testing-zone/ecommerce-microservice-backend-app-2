@@ -19,16 +19,26 @@ spec:
     spec:
       containers:
       - name: user-service
-        image: user-service-ecommerce:latest
+        image: user-service-ecommerce:1
         imagePullPolicy: Never
         ports:
         - containerPort: 8700
           name: http
         env:
         - name: SPRING_PROFILES_ACTIVE
-          value: "k8s"
+          value: "standalone"
         - name: JAVA_OPTS
           value: "-Xmx512m -Xms256m"
+        - name: EUREKA_CLIENT_ENABLED
+          value: "false"
+        - name: EUREKA_CLIENT_REGISTER_WITH_EUREKA
+          value: "false"
+        - name: EUREKA_CLIENT_FETCH_REGISTRY
+          value: "false"
+        - name: SPRING_CONFIG_IMPORT
+          value: "optional:configserver:"
+        - name: SPRING_ZIPKIN_ENABLED
+          value: "false"
         volumeMounts:
         - name: config-volume
           mountPath: /home/app/config
