@@ -150,10 +150,20 @@ class ProductServiceTest {
     @DisplayName("Should validate product stock availability")
     void testValidateStockAvailability_Success() {
         // Given
+        Category testCategory = Category.builder()
+                .categoryId(1)
+                .categoryTitle("Electronics")
+                .imageUrl("http://example.com/electronics.jpg")
+                .build();
+        
         Product productWithStock = Product.builder()
                 .productId(1)
                 .productTitle("iPhone 14")
+                .imageUrl("http://example.com/iphone14.jpg")
+                .sku("IPH14-001")
+                .priceUnit(999.99)
                 .quantity(10)
+                .category(testCategory)
                 .build();
         
         when(productRepository.findById(1)).thenReturn(Optional.of(productWithStock));
@@ -163,8 +173,11 @@ class ProductServiceTest {
 
         // Then
         assertNotNull(result);
+        assertNotNull(result.getCategoryDto());
         assertTrue(result.getQuantity() > 0);
         assertEquals(10, result.getQuantity());
+        assertEquals(1, result.getCategoryDto().getCategoryId());
+        assertEquals("Electronics", result.getCategoryDto().getCategoryTitle());
         verify(productRepository, times(1)).findById(1);
     }
 } 

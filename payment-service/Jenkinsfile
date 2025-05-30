@@ -43,7 +43,6 @@ pipeline {
                 always {
                     dir('payment-service') {
                         junit 'target/surefire-reports/*.xml'
-                        publishTestResults testResultsPattern: 'target/surefire-reports/*.xml'
                     }
                 }
             }
@@ -59,7 +58,7 @@ pipeline {
             post {
                 always {
                     dir('payment-service') {
-                        publishTestResults testResultsPattern: 'target/surefire-reports/*.xml'
+                        junit 'target/surefire-reports/*.xml'
                     }
                 }
             }
@@ -150,7 +149,7 @@ pipeline {
             }
             post {
                 always {
-                    publishTestResults testResultsPattern: 'target/surefire-reports/*.xml'
+                    junit 'target/surefire-reports/*.xml'
                 }
             }
         }

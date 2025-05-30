@@ -15,12 +15,12 @@ public interface ProductMappingHelper {
 				.sku(product.getSku())
 				.priceUnit(product.getPriceUnit())
 				.quantity(product.getQuantity())
-				.categoryDto(
+				.categoryDto(product.getCategory() != null ?
 						CategoryDto.builder()
 							.categoryId(product.getCategory().getCategoryId())
 							.categoryTitle(product.getCategory().getCategoryTitle())
 							.imageUrl(product.getCategory().getImageUrl())
-							.build())
+							.build() : null)
 				.build();
 	}
 	
@@ -32,12 +32,12 @@ public interface ProductMappingHelper {
 				.sku(productDto.getSku())
 				.priceUnit(productDto.getPriceUnit())
 				.quantity(productDto.getQuantity())
-				.category(
+				.category(productDto.getCategoryDto() != null ?
 						Category.builder()
 							.categoryId(productDto.getCategoryDto().getCategoryId())
 							.categoryTitle(productDto.getCategoryDto().getCategoryTitle())
 							.imageUrl(productDto.getCategoryDto().getImageUrl())
-							.build())
+							.build() : null)
 				.build();
 	}
 	
