@@ -17,7 +17,9 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.selimhorri.app.domain.Cart;
 import com.selimhorri.app.domain.Order;
+import com.selimhorri.app.dto.CartDto;
 import com.selimhorri.app.dto.OrderDto;
 import com.selimhorri.app.exception.wrapper.OrderNotFoundException;
 import com.selimhorri.app.repository.OrderRepository;
@@ -35,15 +37,29 @@ class OrderServiceTest {
 
     private OrderDto orderDto;
     private Order order;
+    private Cart cart;
+    private CartDto cartDto;
 
     @BeforeEach
     void setUp() {
-        // Setup Order
+        // Setup Cart
+        cart = Cart.builder()
+                .cartId(1)
+                .userId(1)
+                .build();
+
+        cartDto = CartDto.builder()
+                .cartId(1)
+                .userId(1)
+                .build();
+
+        // Setup Order with Cart
         orderDto = OrderDto.builder()
                 .orderId(1)
                 .orderDate(LocalDateTime.now())
                 .orderDesc("Test order description")
                 .orderFee(29.99)
+                .cartDto(cartDto)
                 .build();
 
         order = Order.builder()
@@ -51,6 +67,7 @@ class OrderServiceTest {
                 .orderDate(LocalDateTime.now())
                 .orderDesc("Test order description")
                 .orderFee(29.99)
+                .cart(cart)
                 .build();
     }
 
@@ -69,6 +86,7 @@ class OrderServiceTest {
         assertEquals(1, result.size());
         assertEquals("Test order description", result.get(0).getOrderDesc());
         assertEquals(29.99, result.get(0).getOrderFee());
+        assertEquals(1, result.get(0).getCartDto().getCartId());
         verify(orderRepository, times(1)).findAll();
     }
 
@@ -86,6 +104,7 @@ class OrderServiceTest {
         assertEquals(1, result.getOrderId());
         assertEquals("Test order description", result.getOrderDesc());
         assertEquals(29.99, result.getOrderFee());
+        assertEquals(1, result.getCartDto().getCartId());
         verify(orderRepository, times(1)).findById(1);
     }
 
@@ -118,6 +137,7 @@ class OrderServiceTest {
         assertNotNull(result);
         assertEquals("Test order description", result.getOrderDesc());
         assertEquals(29.99, result.getOrderFee());
+        assertEquals(1, result.getCartDto().getCartId());
         verify(orderRepository, times(1)).save(any(Order.class));
     }
 
@@ -134,5 +154,30 @@ class OrderServiceTest {
         // Then
         verify(orderRepository, times(1)).findById(1);
         verify(orderRepository, times(1)).delete(any(Order.class));
+    }
+
+    @Test
+    @DisplayName("Should update order successfully")
+    void testUpdate_Success() {
+        // Given
+        Order updatedOrder = Order.builder()
+                .orderId(1)
+                .orderDate(LocalDateTime.now())
+                .orderDesc("Updated order description")
+                .orderFee(39.99)
+                .cart(cart)
+                .build();
+
+        when(orderRepository.save(any(Order.class))).thenReturn(updatedOrder);
+
+        // When
+        OrderDto result = orderService.update(orderDto);
+
+        // Then
+        assertNotNull(result);
+        assertEquals("Updated order description", result.getOrderDesc());
+        assertEquals(39.99, result.getOrderFee());
+        assertEquals(1, result.getCartDto().getCartId());
+        verify(orderRepository, times(1)).save(any(Order.class));
     }
 } 
