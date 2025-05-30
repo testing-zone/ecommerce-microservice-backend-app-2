@@ -1,9 +1,9 @@
 FROM jenkins/jenkins:2.440.3-lts
 
-# Switch to root user to install Docker
+# Switch to root user to install Docker and kubectl
 USER root
 
-# Install Docker CLI for ARM64 architecture
+# Install Docker CLI and kubectl
 RUN apt-get update && \
     apt-get install -y \
         apt-transport-https \
@@ -18,18 +18,19 @@ RUN apt-get update && \
     apt-get install -y docker-ce-cli && \
     rm -rf /var/lib/apt/lists/*
 
-# Add jenkins user to docker group and fix permissions
-RUN groupadd -g 999 docker && usermod -aG docker jenkins
-RUN usermod -aG root jenkins
+# Install kubectl
+RUN curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl" && \
+    install -o root -g root -m 0755 kubectl /usr/local/bin/kubectl && \
+    rm kubectl
+
+# Add jenkins user to docker group
+RUN groupadd -g 999 docker || true && usermod -aG docker jenkins
 
 # Switch back to jenkins user
 USER jenkins
 
-# Skip initial setup wizard
-ENV JAVA_OPTS -Djenkins.install.runSetupWizard=false
+# Skip initial setup wizard - REMOVED TO AVOID ISSUES
+# ENV JAVA_OPTS -Djenkins.install.runSetupWizard=false
 
-# Create admin user automatically
-COPY --chown=jenkins:jenkins jenkins-config/ /usr/share/jenkins/ref/init.groovy.d/
-
-# Switch back to root for runtime
-USER root 
+# NOTE: No automatic configuration to avoid startup issues
+# Manual setup required after container starts 
