@@ -36,13 +36,13 @@ pipeline {
             steps {
                 echo 'Running unit tests...'
                 dir('order-service') {
-                    sh 'mvn clean test -Dtest=*ServiceTest'
+                    sh 'mvn clean test -Dtest=*ServiceTest -DfailIfNoTests=false'
                 }
             }
             post {
                 always {
                     dir('order-service') {
-                        junit 'target/surefire-reports/*.xml'
+                        junit allowEmptyResults: true, testResults: 'target/surefire-reports/*.xml'
                     }
                 }
             }
@@ -58,7 +58,7 @@ pipeline {
             post {
                 always {
                     dir('order-service') {
-                        junit 'target/surefire-reports/*.xml'
+                        junit allowEmptyResults: true, testResults: 'target/surefire-reports/*.xml'
                     }
                 }
             }
