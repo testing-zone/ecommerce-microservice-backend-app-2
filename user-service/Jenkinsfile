@@ -3,7 +3,8 @@ pipeline {
     
     tools {
         maven 'Maven'
-        jdk 'JDK-11'
+        // Comentamos temporalmente el JDK hasta solucionarlo
+        // jdk 'JDK-11'
     }
     
     environment {
@@ -16,17 +17,16 @@ pipeline {
     stages {
         stage('Verify Java Version') {
             steps {
-                script {
-                    env.JAVA_HOME = tool 'JDK-11'
-                    env.PATH = "${env.JAVA_HOME}/bin:${env.PATH}"
-                }
-                echo 'Verifying Java version...'
-                sh 'echo "JAVA_HOME: $JAVA_HOME"'
-                sh 'echo "PATH: $PATH"'
+                echo 'Verifying available Java versions...'
+                sh 'echo "Current JAVA_HOME: $JAVA_HOME"'
                 sh 'which java'
-                sh '$JAVA_HOME/bin/java -version'
-                sh '$JAVA_HOME/bin/javac -version'
+                sh 'java -version'
+                sh 'javac -version'
                 sh 'mvn -version'
+                
+                // Verificar si hay otros JDKs disponibles
+                sh 'ls -la /var/jenkins_home/tools/hudson.model.JDK/ || echo "No JDK tools found"'
+                sh 'find /usr -name "java" -type f 2>/dev/null | head -10 || echo "No additional java found"'
             }
         }
         
@@ -39,13 +39,10 @@ pipeline {
         
         stage('Build') {
             steps {
-                script {
-                    env.JAVA_HOME = tool 'JDK-11'
-                    env.PATH = "${env.JAVA_HOME}/bin:${env.PATH}"
-                }
                 echo 'Building the application...'
                 dir('user-service') {
-                    sh 'echo "Using JAVA_HOME: $JAVA_HOME"'
+                    sh 'echo "Using Java version:"'
+                    sh 'java -version'
                     sh 'mvn clean compile -DskipTests'
                 }
             }
@@ -53,10 +50,6 @@ pipeline {
         
         stage('Test') {
             steps {
-                script {
-                    env.JAVA_HOME = tool 'JDK-11'
-                    env.PATH = "${env.JAVA_HOME}/bin:${env.PATH}"
-                }
                 echo 'Running tests...'
                 dir('user-service') {
                     sh 'mvn test'
@@ -74,10 +67,6 @@ pipeline {
         
         stage('Package') {
             steps {
-                script {
-                    env.JAVA_HOME = tool 'JDK-11'
-                    env.PATH = "${env.JAVA_HOME}/bin:${env.PATH}"
-                }
                 echo 'Packaging the application...'
                 dir('user-service') {
                     sh 'mvn package -DskipTests'
