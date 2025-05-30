@@ -20,6 +20,7 @@ spec:
       containers:
       - name: product-service
         image: product-service-ecommerce:{{BUILD_NUMBER}}
+        imagePullPolicy: IfNotPresent
         ports:
         - containerPort: 8082
           name: http
@@ -74,5 +75,4 @@ spec:
       - name: config-volume
         configMap:
           name: product-service-config
-      restartPolicy: Always
-      imagePullPolicy: IfNotPresent 
+      restartPolicy: Always 
