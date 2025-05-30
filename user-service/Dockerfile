@@ -27,10 +27,10 @@ USER appuser
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
-  CMD curl -f http://localhost:8700/actuator/health || exit 1
+  CMD curl -f http://localhost:8087/actuator/health || exit 1
 
 # Expose port
-EXPOSE 8700
+EXPOSE 8087
 
 # Entry point
 ENTRYPOINT ["sh", "-c", "java $JAVA_OPTS -Dspring.profiles.active=${SPRING_PROFILES_ACTIVE} -jar user-service.jar"]

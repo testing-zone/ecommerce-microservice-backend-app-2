@@ -22,7 +22,7 @@ spec:
         image: user-service-ecommerce:1
         imagePullPolicy: Never
         ports:
-        - containerPort: 8700
+        - containerPort: 8087
           name: http
         env:
         - name: SPRING_PROFILES_ACTIVE
@@ -52,14 +52,14 @@ spec:
         livenessProbe:
           httpGet:
             path: /actuator/health/liveness
-            port: 8700
+            port: 8087
           initialDelaySeconds: 60
           periodSeconds: 30
           timeoutSeconds: 10
         readinessProbe:
           httpGet:
             path: /actuator/health/readiness
-            port: 8700
+            port: 8087
           initialDelaySeconds: 30
           periodSeconds: 10
           timeoutSeconds: 5
@@ -78,8 +78,8 @@ metadata:
 spec:
   type: ClusterIP
   ports:
-  - port: 8700
-    targetPort: 8700
+  - port: 8087
+    targetPort: 8087
     protocol: TCP
     name: http
   selector:

@@ -1,42 +1,38 @@
-# Multi-stage build for shipping-service
-FROM maven:3.9.9-openjdk-17-slim AS build
+FROM openjdk:11-jre-slim
 
-# Set working directory
-WORKDIR /app
+# Metadata
+LABEL maintainer="ecommerce-team"
+LABEL version="0.1.0"
+LABEL description="Shipping Service for E-commerce Microservices"
 
-# Copy parent pom.xml and shipping-service specific files
-COPY ../pom.xml ./parent-pom.xml
-COPY pom.xml ./
-COPY src/ ./src/
+# Arguments
+ARG PROJECT_VERSION=0.1.0
+ARG JAR_FILE=target/shipping-service-v${PROJECT_VERSION}.jar
 
-# Build the application
-RUN mvn clean package -DskipTests
+# Create app directory
+RUN mkdir -p /home/app
+WORKDIR /home/app
 
-# Production stage
-FROM openjdk:17.0.2-jdk-slim
+# Environment variables
+ENV SPRING_PROFILES_ACTIVE=dev
+ENV JAVA_OPTS="-Xmx512m -Xms256m"
 
-# Install curl for health checks
-RUN apt-get update && apt-get install -y curl && rm -rf /var/lib/apt/lists/*
+# Copy the jar file
+COPY ${JAR_FILE} shipping-service.jar
 
-# Set working directory
-WORKDIR /app
-
-# Copy the built jar from build stage
-COPY --from=build /app/target/*.jar shipping-service.jar
-
-# Create non-root user for security
-RUN groupadd -r appuser && useradd -r -g appuser appuser
-RUN chown -R appuser:appuser /app
+# Create non-root user
+RUN groupadd -r appgroup && useradd -r -g appgroup appuser
+RUN chown -R appuser:appgroup /home/app
 USER appuser
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
+  CMD curl -f http://localhost:8085/actuator/health || exit 1
 
 # Expose port
 EXPOSE 8085
 
-# Health check
-HEALTHCHECK --interval=30s --timeout=3s --start-period=60s --retries=3 \
-    CMD curl -f http://localhost:8085/shipping-service/actuator/health || exit 1
-
-# Run the application
-ENTRYPOINT ["java", "-Djava.security.egd=file:/dev/./urandom", "-jar", "shipping-service.jar"]
+# Entry point
+ENTRYPOINT ["sh", "-c", "java $JAVA_OPTS -Dspring.profiles.active=${SPRING_PROFILES_ACTIVE} -jar shipping-service.jar"]
 
 
