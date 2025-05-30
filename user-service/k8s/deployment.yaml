@@ -20,7 +20,7 @@ spec:
       containers:
       - name: user-service
         image: user-service-ecommerce:latest
-        imagePullPolicy: IfNotPresent
+        imagePullPolicy: Never
         ports:
         - containerPort: 8700
           name: http
