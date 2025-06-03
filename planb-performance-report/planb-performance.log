@@ -1,0 +1,6 @@
+[2025-06-03 10:52:15,173] Svaks-MacBook-Pro-2/INFO/locust.main: Starting Locust 2.37.6
+[2025-06-03 10:52:15,179] Svaks-MacBook-Pro-2/INFO/locust.main: Run time limit set to 60 seconds
+[2025-06-03 10:52:15,179] Svaks-MacBook-Pro-2/INFO/locust.runners: Ramping to 20 users at a rate of 5.00 per second
+[2025-06-03 10:52:18,191] Svaks-MacBook-Pro-2/INFO/locust.runners: All users spawned: {"PlanBLoadTest": 20} (20 total users)
+[2025-06-03 10:52:48,770] Svaks-MacBook-Pro-2/INFO/locust.main: writing html report to file: planb-performance-report.html
+[2025-06-03 10:52:48,772] Svaks-MacBook-Pro-2/INFO/locust.main: Shutting down (exit code 0)
