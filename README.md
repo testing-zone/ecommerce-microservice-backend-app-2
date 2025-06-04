@@ -86,33 +86,6 @@ Sistema de microservicios e-commerce desplegado en Kubernetes con:
 | `4-configurar-jenkins.sh` | Guía de configuración Jenkins | Manual |
 | `5-configurar-ambientes-e2e.sh` | Setup ambientes y E2E | ~3 min |
 
----
-
-## 🎯 Cumplimiento Taller 2
-
-### ✅ Requisitos Obligatorios
-- **5+ Pruebas Unitarias**: ✅ 15 implementadas
-- **5+ Pruebas Integración**: ✅ 8 implementadas  
-- **5+ Pruebas E2E**: ✅ 8 implementadas
-- **Pruebas Performance**: ✅ Locust con reportes HTML
-- **Jenkins Pipeline**: ✅ Con todos los stages
-- **Kubernetes Deploy**: ✅ 6 microservicios
-
-### 📊 Pipeline Completo
-- ✅ Declarative: Checkout SCM
-- ✅ Declarative: Tool Install  
-- ✅ Verify Environment
-- ✅ Checkout
-- ✅ Unit Tests
-- ✅ Integration Tests
-- ✅ Build Application
-- ✅ Code Quality Analysis
-- ✅ Docker Build
-- ✅ **Deploy to Dev Environment**
-- ✅ **E2E Tests**
-- ✅ **Deploy to Production**
-- ✅ Archive Artifacts
-- ✅ Declarative: Post Actions
 
 ---
 
@@ -124,11 +97,7 @@ Sistema de microservicios e-commerce desplegado en Kubernetes con:
 <summary>🔍 Ver Jenkins Pipeline Dashboard</summary>
 
 > **Espacio para screenshot de Jenkins con el pipeline completo funcionando**
-> 
-> Aquí puedes poner la imagen que muestre:
-> - Pipeline con todos los stages en verde
-> - Tiempos de ejecución de cada stage
-> - Build number y timestamp
+> <img width="1348" alt="Screenshot 2025-06-04 at 8 50 15 AM" src="https://github.com/user-attachments/assets/ec94e7ed-9a61-4f8f-b149-2839a82a96b1" />
 
 </details>
 
@@ -136,14 +105,7 @@ Sistema de microservicios e-commerce desplegado en Kubernetes con:
 
 <details>
 <summary>🔍 Ver Pods en Kubernetes</summary>
-
-> **Espacio para screenshot de kubectl get pods**
-> 
-> Ejemplo de comando:
-> ```bash
-> kubectl get pods -n ecommerce
-> ```
-
+> <img width="525" alt="Screenshot 2025-06-04 at 8 51 01 AM" src="https://github.com/user-attachments/assets/f972a651-eb0c-4a6c-8aee-99cc94758ca1" />
 </details>
 
 ### 📸 Performance Reports
@@ -152,8 +114,13 @@ Sistema de microservicios e-commerce desplegado en Kubernetes con:
 <summary>🔍 Ver Reportes de Performance</summary>
 
 > **Espacio para screenshot de los reportes HTML de Locust**
-> 
-> Ubicación: `performance-reports/`
+> <img width="789" alt="Screenshot 2025-06-04 at 8 51 27 AM" src="https://github.com/user-attachments/assets/d7fcf437-1afa-4930-9ee2-926dc9d3fc2c" />
+> basic_test_20250604_073658.html
+> <img width="1309" alt="Screenshot 2025-06-04 at 8 51 34 AM" src="https://github.com/user-attachments/assets/fb7c8417-bb85-49d7-8328-20a3858b6815" />
+> medium_load_20250604_073658.html
+> <img width="1304" alt="Screenshot 2025-06-04 at 8 52 09 AM" src="https://github.com/user-attachments/assets/7072cb6d-53ee-47b9-84ea-1a9fd580fcab" />
+> stress_test_20250604_073658.html
+> <img width="1347" alt="Screenshot 2025-06-04 at 8 52 20 AM" src="https://github.com/user-attachments/assets/1b204222-a021-4582-b122-6b4b8a00f6c6" />
 
 </details>
 
@@ -162,12 +129,14 @@ Sistema de microservicios e-commerce desplegado en Kubernetes con:
 <details>
 <summary>🔍 Ver Microservicios Configurados en Jenkins</summary>
 
-> **📋 Aquí puedes poner el screenshot de Jenkins mostrando:**
-> - Lista de jobs/pipelines creados
-> - Estado de cada microservicio
-> - Builds exitosos
-
+> <img width="1664" alt="Screenshot 2025-06-04 at 8 52 45 AM" src="https://github.com/user-attachments/assets/e5f1ad25-f384-4fdc-b392-ea71dbf60230" />
+> <img width="1667" alt="Screenshot 2025-06-04 at 8 53 09 AM" src="https://github.com/user-attachments/assets/8af8a0e3-2e05-4f3e-979b-2d4d5e51d9d0" />
+> <img width="862" alt="Screenshot 2025-06-04 at 8 53 29 AM" src="https://github.com/user-attachments/assets/2a81953a-f6d2-4bd8-8764-e4c5181dc36a" />
+> <img width="1717" alt="Screenshot 2025-06-04 at 8 53 46 AM" src="https://github.com/user-attachments/assets/b02806b3-b3ba-4f71-97af-0c111e239572" />
+> <img width="1659" alt="Screenshot 2025-06-04 at 8 53 59 AM" src="https://github.com/user-attachments/assets/e5815dd6-697b-41f6-9577-3e308c746b4e" />
+> <img width="1663" alt="Screenshot 2025-06-04 at 8 54 10 AM" src="https://github.com/user-attachments/assets/fb6fc2ef-5660-4e72-a3a1-1493b2d7c8f1" />
 </details>
+
 
 ---
 
@@ -195,7 +164,7 @@ cd e2e-tests && ./run_e2e_tests.sh
 
 ---
 
-## 🌍 Ambientes Configurados
+## Ambientes Configurados
 
 | Ambiente | Namespace | Descripción |
 |----------|-----------|-------------|
@@ -203,6 +172,7 @@ cd e2e-tests && ./run_e2e_tests.sh
 | **Staging** | `ecommerce-staging` | Ambiente de pre-producción |
 | **Producción** | `ecommerce-prod` | Ambiente de producción |
 | **Testing** | `ecommerce` | Ambiente principal para demos |
+<img width="374" alt="Screenshot 2025-06-04 at 8 55 34 AM" src="https://github.com/user-attachments/assets/81b43e8d-95bb-4c9e-8476-17295a759085" />
 
 ---
 
