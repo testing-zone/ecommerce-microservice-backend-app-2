@@ -1,3 +1,8 @@
+#### Integrantes
+ - Sara Cardona
+ - Luis Pinillos
+ - 
+
 # 🚀 Taller 2: E-commerce Microservices Backend
 ### Sistema completo con Jenkins, Kubernetes y Pruebas Automatizadas
 
@@ -277,17 +282,4 @@ ecommerce-microservice-backend-app-2/
 
 </details>
 
----
 
-## 🎉 Estado Final
-
-**✅ TALLER 2 COMPLETADO AL 100%**
-
-- 🏆 **Todos los requisitos cumplidos**
-- 📊 **Evidencias verificables generadas**
-- 🔧 **Sistema completamente funcional**
-- 📋 **Documentación completa**
-
----
-
-**🚀 Listo para presentar y entregar**
