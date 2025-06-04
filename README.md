@@ -1,7 +1,7 @@
 #### Integrantes
  - Sara Cardona
  - Luis Pinillos
- - 
+ - Alejandro Torres
 
 # 🚀 Taller 2: E-commerce Microservices Backend
 ### Sistema completo con Jenkins, Kubernetes y Pruebas Automatizadas
