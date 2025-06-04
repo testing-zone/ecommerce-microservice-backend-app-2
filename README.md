@@ -96,7 +96,6 @@ Sistema de microservicios e-commerce desplegado en Kubernetes con:
 <details>
 <summary>🔍 Ver Jenkins Pipeline Dashboard</summary>
 
-> **Espacio para screenshot de Jenkins con el pipeline completo funcionando**
 > <img width="1348" alt="Screenshot 2025-06-04 at 8 50 15 AM" src="https://github.com/user-attachments/assets/ec94e7ed-9a61-4f8f-b149-2839a82a96b1" />
 
 </details>
@@ -113,7 +112,6 @@ Sistema de microservicios e-commerce desplegado en Kubernetes con:
 <details>
 <summary>🔍 Ver Reportes de Performance</summary>
 
-> **Espacio para screenshot de los reportes HTML de Locust**
 > <img width="789" alt="Screenshot 2025-06-04 at 8 51 27 AM" src="https://github.com/user-attachments/assets/d7fcf437-1afa-4930-9ee2-926dc9d3fc2c" />
 > basic_test_20250604_073658.html
 > <img width="1309" alt="Screenshot 2025-06-04 at 8 51 34 AM" src="https://github.com/user-attachments/assets/fb7c8417-bb85-49d7-8328-20a3858b6815" />
