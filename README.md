@@ -15,63 +15,9 @@
 
 Este proyecto implementa una arquitectura de microservicios para un sistema de e-commerce desarrollado con **Spring Boot** y desplegado usando **Jenkins**, **Docker** y **Kubernetes**. Como parte del **Taller 2**, he implementado un sistema completo de CI/CD con pruebas exhaustivas que incluyen tests unitarios, de integración, E2E y pruebas de rendimiento.
 
-### 🎯 Objetivos del Taller 2 Completados
-
-✅ **1. (10%) Configuración de Jenkins, Docker y Kubernetes**
-- Jenkins 2.440.3-lts configurado en localhost:8081
-- Docker integrado para construcción de imágenes
-- Kubernetes configurado para deployment automático
-
-✅ **2. (15%) Pipelines para construcción (dev environment)**
-- 6 microservicios con pipelines completamente funcionales
-- Construcción automática con validación de código
-
-✅ **3. (30%) Suite completa de pruebas**
-- **5+ pruebas unitarias** por servicio
-- **5+ pruebas de integración** con MockMvc
-- **5+ pruebas E2E** con flujos completos
-- **Pruebas de rendimiento** con Locust
-
-✅ **4. (15%) Pipelines con deployment en Kubernetes (stage environment)**
-- Deployment automático a entorno de staging
-- Validación completa antes del despliegue
-
-✅ **5. (15%) Pipeline de producción con Release Notes automáticas**
-- Pipeline master con aprobación manual
-- Generación automática de Release Notes
-- Deployment a producción con rollback capability
-
-✅ **6. (15%) Documentación completa**
-- Screenshots de configuración y ejecución
-- Análisis de resultados de pruebas
-- Métricas de rendimiento detalladas
-
-## 🏗️ Arquitectura del Sistema
-
-### Microservicios Implementados
-
-| Servicio | Puerto | Descripción | Pipeline Status |
-|----------|--------|-------------|----------------|
-| **user-service** | 8087 | Gestión de usuarios y autenticación | ✅ Activo |
-| **product-service** | 8082 | Catálogo de productos e inventario | ✅ Activo |
-| **order-service** | 8083 | Gestión de pedidos y carritos | ✅ Activo |
-| **payment-service** | 8084 | Procesamiento de pagos | ✅ Activo |
-| **shipping-service** | 8085 | Gestión de envíos | ✅ Activo |
-| **favourite-service** | 8086 | Lista de favoritos de usuarios | ✅ Activo |
-
-### Servicios de Soporte
-- **service-discovery** (8761): Eureka Server
-- **api-gateway** (8080): Gateway principal
-- **cloud-config** (8888): Configuración centralizada
-
-![Arquitectura del Sistema](app-architecture.drawio.png)
-
-### Diagrama de Base de Datos
-![Entity-Relationship Diagram](ecommerce-ERD.drawio.png)
-
 ## 🚀 Implementación del Taller 2
 
-### 1. Configuración de Infraestructura (10%)
+### 1. Configuración de Infraestructura
 
 #### Jenkins Configuration
 - **Versión**: Jenkins 2.440.3-lts
@@ -81,16 +27,7 @@ Este proyecto implementa una arquitectura de microservicios para un sistema de e
   - Performance testing con Locust integration
 
 #### Docker Setup
-He implementado Dockerfiles optimizados para todos los microservicios:
-```dockerfile
-FROM openjdk:11-jre-slim
-ARG PROJECT_VERSION=0.1.0
-ARG JAR_FILE=target/service-name-v${PROJECT_VERSION}.jar
-COPY ${JAR_FILE} service.jar
-# Configuración de seguridad y health checks
-EXPOSE [puerto]
-ENTRYPOINT ["sh", "-c", "java $JAVA_OPTS -Dspring.profiles.active=${SPRING_PROFILES_ACTIVE} -jar service.jar"]
-```
+Implementamos Dockerfiles optimizados para todos los microservicios:
 
 #### Kubernetes Configuration
 Manifiestos completos para cada microservicio:
@@ -99,7 +36,7 @@ Manifiestos completos para cada microservicio:
 - **Services**: ClusterIP y LoadBalancer
 - **ConfigMaps**: Configuración por ambiente
 
-### 2. Pipelines de Desarrollo (15%)
+### 2. Pipelines de Desarrollo 
 
 He implementado pipelines completos para los 6 microservicios con las siguientes etapas:
 
@@ -246,30 +183,14 @@ class StressTest(HttpUser):
 ### Screenshots de Configuración Jenkins
 
 #### Dashboard Principal
-*[Espacio reservado para screenshot del dashboard de Jenkins con todos los pipelines]*
 
-![Jenkins Dashboard](docs/screenshots/jenkins-dashboard.png)
 
 #### Configuración de Pipeline
-*[Espacio reservado para screenshot de configuración de pipeline individual]*
 
-![Pipeline Configuration](docs/screenshots/pipeline-configuration.png)
 
 #### Ejecución Exitosa
-*[Espacio reservado para screenshot de ejecución exitosa con todas las etapas]*
-
-![Successful Execution](docs/screenshots/successful-execution.png)
 
 ### Estado Actual de Pipelines
-
-| Pipeline | Último Éxito | Último Fallo | Duración | Status |
-|----------|--------------|--------------|----------|--------|
-| product-service-pipeline | #10 (1 min 32 seg) | #9 (7 min 5 seg) | 58 seg | ✅ |
-| user-service-pipeline | #4 (15 min) | N/D | 25 seg | ✅ |
-| payment-service-pipeline | #3 (7 min 6 seg) | #2 (20 min) | 29 seg | ✅ |
-| shipping-service-pipeline | #6 (1 min 32 seg) | #5 (7 min 5 seg) | 36 seg | ✅ |
-| order-service-pipeline | #4 (7 min 43 seg) | #3 (15 min) | 24 seg | ✅ |
-| favourite-service-pipeline | #3 (7 min 7 seg) | #2 (20 min) | 26 seg | ✅ |
 
 ## ☸️ Despliegue en Kubernetes
 
@@ -306,60 +227,38 @@ Para cada microservicio he creado:
 ### Screenshots de Kubernetes
 
 #### Pods en Ejecución
-*[Espacio reservado para screenshot de pods corriendo en Kubernetes]*
-
-![Kubernetes Pods](docs/screenshots/k8s-pods.png)
-
 #### Services y Endpoints
-*[Espacio reservado para screenshot de services y endpoints]*
 
-![Kubernetes Services](docs/screenshots/k8s-services.png)
+<img width="638" alt="Screenshot 2025-06-03 at 8 02 57 PM" src="https://github.com/user-attachments/assets/6e5ff059-239c-4c6a-a3ce-6159696b542b" />
 
 ## 📈 Resultados y Screenshots
 
-### Métricas de Pruebas Unitarias
+### Métricas de Pruebas 
 
-*[Espacio reservado para screenshot de resultados de pruebas unitarias]*
+<img width="1346" alt="Screenshot 2025-06-04 at 8 04 25 AM" src="https://github.com/user-attachments/assets/95980aea-61d7-47f3-840f-7168b91010e5" />
+<img width="1341" alt="Screenshot 2025-06-04 at 8 05 10 AM" src="https://github.com/user-attachments/assets/70433eb9-e1f9-4630-baf6-9c56be72242c" />
+<img width="1341" alt="Screenshot 2025-06-04 at 8 09 53 AM" src="https://github.com/user-attachments/assets/25dd11aa-0e3c-4f46-9441-ec7848dc4a36" />
+<img width="1391" alt="Screenshot 2025-06-04 at 8 10 21 AM" src="https://github.com/user-attachments/assets/d72590b4-2eca-4456-bbb0-20cde9e9a4b4" />
+<img width="1382" alt="Screenshot 2025-06-04 at 8 11 17 AM" src="https://github.com/user-attachments/assets/4e6272af-1ddf-4006-bd26-3e481c5a5593" />
+<img width="1397" alt="Screenshot 2025-06-04 at 8 11 27 AM" src="https://github.com/user-attachments/assets/87c8f83b-853f-49ed-ac7f-db2a61d96560" />
+<img width="1445" alt="Screenshot 2025-06-04 at 8 11 51 AM" src="https://github.com/user-attachments/assets/92cd5a8e-cefb-4cb0-89bb-1a8b4a523697" />
 
-![Unit Tests Results](docs/screenshots/unit-tests-results.png)
-
-**Resultados Obtenidos**:
-- ✅ Product Service: 5/5 tests passed
-- ✅ Order Service: 5/5 tests passed  
-- ✅ Payment Service: 8/8 tests passed
-- ✅ Shipping Service: 7/7 tests passed
-- ✅ User Service: Tests executed successfully
-- ✅ Favourite Service: 9/9 tests passed
-
-### Métricas de Pruebas de Integración
-
-*[Espacio reservado para screenshot de resultados de integración]*
-
-![Integration Tests Results](docs/screenshots/integration-tests-results.png)
-
-**Resultados de Integración**:
-- ✅ 5 tests de integración completos
-- ✅ Validación de comunicación entre servicios
-- ✅ MockMvc testing exitoso
-
-### Resultados de Pruebas E2E
-
-*[Espacio reservado para screenshot de pruebas E2E]*
-
-![E2E Tests Results](docs/screenshots/e2e-tests-results.png)
-
-**Flujos E2E Validados**:
-- ✅ Registro y autenticación de usuario
-- ✅ Navegación del catálogo de productos
-- ✅ Proceso completo de compra
-- ✅ Gestión de pagos y envíos
-- ✅ Funcionalidades de favoritos
 
 ### Métricas de Rendimiento con Locust
 
-*[Espacio reservado para screenshot de métricas de Locust]*
+<img width="738" alt="Screenshot 2025-06-04 at 8 14 22 AM" src="https://github.com/user-attachments/assets/716b3c23-b135-48e6-b61a-f86d93acb0fc" />
 
-![Performance Results](docs/screenshots/locust-performance.png)
+### Prueba basica
+basic_test_20250604_073658.html
+<img width="1216" alt="Screenshot 2025-06-04 at 8 15 36 AM" src="https://github.com/user-attachments/assets/69d02502-cce1-476d-b702-16825972217d" />
+
+### Carga media
+medium_load_20250604_073658.html
+<img width="1231" alt="Screenshot 2025-06-04 at 8 16 10 AM" src="https://github.com/user-attachments/assets/aeb03838-d11d-4fa2-949e-f13d46420812" />
+
+### Prueba de estres
+stress_test_20250604_073658.html
+<img width="1315" alt="Screenshot 2025-06-04 at 8 16 37 AM" src="https://github.com/user-attachments/assets/60104fc2-cdd8-4892-87f6-f951233f684d" />
 
 **Métricas Clave**:
 - **Tiempo de Respuesta Promedio**: < 200ms
