@@ -1,6 +1,6 @@
 #### Integrantes
  - Sara Cardona
- - Luis Pinillos
+ - Luis Pinillos - A00381323
  - Alejandro Torres
 
 # 🚀 Taller 2: E-commerce Microservices Backend
