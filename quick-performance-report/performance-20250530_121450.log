@@ -1,7 +1,0 @@
-[2025-05-30 12:15:03,716] Svaks-MacBook-Pro-2/INFO/locust.main: Starting Locust 2.37.6
-[2025-05-30 12:15:03,721] Svaks-MacBook-Pro-2/INFO/locust.main: Run time limit set to 60 seconds
-[2025-05-30 12:15:03,722] Svaks-MacBook-Pro-2/INFO/locust.runners: Ramping to 50 users at a rate of 5.00 per second
-[2025-05-30 12:15:12,755] Svaks-MacBook-Pro-2/INFO/locust.runners: All users spawned: {"EcommerceLoadTest": 50} (50 total users)
-[2025-05-30 12:16:02,088] Svaks-MacBook-Pro-2/INFO/locust.main: --run-time limit reached, shutting down
-[2025-05-30 12:16:02,178] Svaks-MacBook-Pro-2/INFO/locust.main: writing html report to file: ../../../quick-performance-report/performance-report-20250530_121450.html
-[2025-05-30 12:16:02,179] Svaks-MacBook-Pro-2/INFO/locust.main: Shutting down (exit code 1)
