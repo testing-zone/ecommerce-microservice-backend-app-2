@@ -1,5 +1,0 @@
-Method,Name,Error,Occurrences
-GET,/api/orders,CatchResponseError('Failed to view all orders: 0'),104
-GET,/api/users,CatchResponseError('Failed to view all users: 0'),120
-POST,/api/users,CatchResponseError('Failed to create admin user: 0'),20
-POST,/api/products,CatchResponseError('Failed to create product: 0'),207

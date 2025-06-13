@@ -1,5 +1,0 @@
-Method,Name,Error,Occurrences
-POST,POST /api/orders,RemoteDisconnected('Remote end closed connection without response'),5
-GET,GET /api/users/[id],HTTPError('403 Client Error: Forbidden for url: GET /api/users/[id]'),4009
-GET,Health Check - Product,RemoteDisconnected('Remote end closed connection without response'),1
-GET,Health Check - User,HTTPError('403 Client Error: Forbidden for url: Health Check - User'),1307

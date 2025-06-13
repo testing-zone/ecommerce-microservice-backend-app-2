@@ -1,8 +1,0 @@
-Method,Name,Error,Occurrences
-POST,/api/users,CatchResponseError('Failed to create user: 0'),100
-GET,/api/products/search?title=camera,CatchResponseError('Failed to search products: 0'),493
-GET,/api/products/search?title=laptop,CatchResponseError('Failed to search products: 0'),465
-GET,/api/products/search?title=phone,CatchResponseError('Failed to search products: 0'),458
-GET,/api/products/search?title=headphones,CatchResponseError('Failed to search products: 0'),510
-GET,/api/products/search?title=tablet,CatchResponseError('Failed to search products: 0'),478
-GET,/api/products,CatchResponseError('Failed to browse products: 0'),3696

@@ -1,7 +1,0 @@
-Method,Name,Error,Occurrences
-GET,/api/products/search?title=laptop,CatchResponseError('Stress search failed: 0'),3687
-GET,/api/products/search?title=phone,CatchResponseError('Stress search failed: 0'),3566
-GET,/api/products/search?title=item,CatchResponseError('Stress search failed: 0'),3556
-GET,/api/products/search?title=test,CatchResponseError('Stress search failed: 0'),3653
-GET,/api/products,CatchResponseError('Stress test failed: 0'),18058
-GET,/api/products/search?title=product,CatchResponseError('Stress search failed: 0'),3738
