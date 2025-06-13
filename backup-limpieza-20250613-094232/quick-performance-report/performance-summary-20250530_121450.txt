@@ -1,0 +1,29 @@
+🚀 REPORTE DE PERFORMANCE - TALLER 2
+=====================================
+Fecha: Fri May 30 12:16:02 -05 2025
+Configuración:
+- URL Base: https://httpbin.org
+- Duración: 60s
+- Usuarios máximos: 50
+- Tasa de spawn: 5 usuarios/segundo
+
+📁 Archivos generados:
+- performance-report-20250530_121450.html (Reporte visual completo)
+- performance-stats-.csv (Datos CSV)
+- performance-20250530_121450.log (Log detallado)
+
+📊 Para ver el reporte:
+open quick-performance-report/performance-report-20250530_121450.html
+
+✅ Este reporte demuestra:
+1. Capacidad del sistema bajo carga
+2. Tiempo de respuesta promedio
+3. Tasa de éxito de las peticiones
+4. Throughput (requests por segundo)
+5. Comportamiento bajo diferentes niveles de carga
+
+🎯 Métricas importantes para el Taller 2:
+- Response Time Average (tiempo promedio de respuesta)
+- Requests per Second (peticiones por segundo)
+- Error Rate (tasa de errores)
+- Concurrent Users Supported (usuarios concurrentes soportados)

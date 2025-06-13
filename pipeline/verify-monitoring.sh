@@ -3,7 +3,6 @@
 echo "🔍 VERIFICANDO PILA COMPLETA DE MONITOREO"
 echo "========================================="
 echo ""
-
 # Configuración de timeouts
 TIMEOUT_SECONDS=120  # 2 minutos
 RETRY_INTERVAL=5     # 5 segundos entre reintentos

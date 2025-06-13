@@ -1,0 +1,12 @@
+Method,Name,Error,Occurrences
+GET,/api/products,CatchResponseError('Failed to browse products: 404'),213
+GET,/api/products/search?title=laptop,CatchResponseError('Failed to search products: 502'),1
+GET,/api/products/search?title=camera,CatchResponseError('Failed to search products: 404'),26
+GET,/api/products/search?title=tablet,CatchResponseError('Failed to search products: 502'),1
+GET,/api/products,CatchResponseError('Failed to browse products: 502'),6
+GET,/api/products/search?title=phone,CatchResponseError('Failed to search products: 404'),26
+POST,/api/users,CatchResponseError('Failed to create user: 502'),1
+GET,/api/products/search?title=headphones,CatchResponseError('Failed to search products: 404'),23
+GET,/api/products/search?title=tablet,CatchResponseError('Failed to search products: 404'),36
+GET,/api/products/search?title=laptop,CatchResponseError('Failed to search products: 404'),25
+POST,/api/users,CatchResponseError('Failed to create user: 404'),49
