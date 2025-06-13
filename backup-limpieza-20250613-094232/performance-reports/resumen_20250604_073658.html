@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Reporte de Performance - E-commerce Microservices</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .header { background: #f44336; color: white; padding: 20px; border-radius: 5px; }
+        .test { background: #f5f5f5; padding: 15px; margin: 10px 0; border-radius: 5px; }
+        .success { color: #4CAF50; }
+        .warning { color: #FF9800; }
+        .error { color: #f44336; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>📊 Reporte de Performance E-commerce</h1>
+        <p>Generado: Wed Jun  4 07:47:09 -05 2025</p>
+    </div>
+
+    <h2>🧪 Pruebas Ejecutadas</h2>
+    
+    <div class="test">
+        <h3>Test 1: Prueba Básica</h3>
+        <p><strong>Usuarios:</strong> 50 concurrentes</p>
+        <p><strong>Duración:</strong> 2 minutos</p>
+        <p><strong>Reporte:</strong> <a href="basic_test_20250604_073658.html">Ver reporte detallado</a></p>
+    </div>
+    
+    <div class="test">
+        <h3>Test 2: Carga Media</h3>
+        <p><strong>Usuarios:</strong> 100 concurrentes</p>
+        <p><strong>Duración:</strong> 3 minutos</p>
+        <p><strong>Reporte:</strong> <a href="medium_load_20250604_073658.html">Ver reporte detallado</a></p>
+    </div>
+    
+    <div class="test">
+        <h3>Test 3: Prueba de Estrés</h3>
+        <p><strong>Usuarios:</strong> 200 concurrentes</p>
+        <p><strong>Duración:</strong> 5 minutos</p>
+        <p><strong>Reporte:</strong> <a href="stress_test_20250604_073658.html">Ver reporte detallado</a></p>
+    </div>
+
+    <h2>📁 Archivos Generados</h2>
+    <ul>
+        <li>basic_test_20250604_073658.html</li>
+        <li>medium_load_20250604_073658.html</li>
+        <li>stress_test_20250604_073658.html</li>
+        <li>basic_test_20250604_073658_stats.csv</li>
+        <li>medium_load_20250604_073658_stats.csv</li>
+        <li>stress_test_20250604_073658_stats.csv</li>
+    </ul>
+
+    <h2>💡 Cómo Interpretar los Resultados</h2>
+    <ul>
+        <li><strong>RPS:</strong> Requests per Second - Mayor es mejor</li>
+        <li><strong>Response Time:</strong> Tiempo de respuesta - Menor es mejor</li>
+        <li><strong>Failure Rate:</strong> Tasa de error - Menor es mejor</li>
+        <li><strong>95% percentile:</strong> 95% de requests bajo este tiempo</li>
+    </ul>
+</body>
+</html>

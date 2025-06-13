@@ -1,0 +1,72 @@
+server:
+  port: 8080
+  servlet:
+    context-path: /user-service
+
+spring:
+  application:
+    name: USER-SERVICE
+  
+  # Database H2 en memoria para standalone
+  datasource:
+    url: jdbc:h2:mem:testdb
+    driverClassName: org.h2.Driver
+    username: sa
+    password: ""
+  
+  h2:
+    console:
+      enabled: true
+      path: /h2-console
+  
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+  
+  # DESHABILITAR CONFIG SERVER
+  config:
+    import: none
+  
+  # DESHABILITAR ZIPKIN
+  zipkin:
+    enabled: false
+
+# DESHABILITAR EUREKA COMPLETAMENTE
+eureka:
+  client:
+    enabled: false
+    service-url:
+      defaultZone: http://localhost:8761/eureka
+    register-with-eureka: false
+    fetch-registry: false
+
+# DESHABILITAR CIRCUIT BREAKER para standalone
+resilience4j:
+  circuitbreaker:
+    instances:
+      userService:
+        register-health-indicator: false
+
+# MANAGEMENT ENDPOINTS
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics
+  endpoint:
+    health:
+      show-details: always
+  health:
+    circuitbreakers:
+      enabled: false
+
+# LOGGING
+logging:
+  level:
+    com.selimhorri.pack: DEBUG
+    org.springframework.cloud: WARN
+    com.netflix: WARN 

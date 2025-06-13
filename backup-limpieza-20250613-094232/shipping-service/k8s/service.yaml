@@ -1,0 +1,33 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: shipping-service
+  namespace: ecommerce-shipping-dev
+  labels:
+    app: shipping-service
+spec:
+  type: ClusterIP
+  ports:
+  - port: 8085
+    targetPort: 8085
+    protocol: TCP
+    name: http
+  selector:
+    app: shipping-service
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: shipping-service-loadbalancer
+  namespace: ecommerce-shipping-dev
+  labels:
+    app: shipping-service
+spec:
+  type: LoadBalancer
+  ports:
+  - port: 8085
+    targetPort: 8085
+    protocol: TCP
+    name: http
+  selector:
+    app: shipping-service 

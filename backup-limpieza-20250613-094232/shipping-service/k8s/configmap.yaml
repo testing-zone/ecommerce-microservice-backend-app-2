@@ -1,0 +1,30 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: shipping-service-config
+  namespace: ecommerce-shipping-dev
+  labels:
+    app: shipping-service
+data:
+  SPRING_PROFILES_ACTIVE: "dev"
+  SPRING_DATASOURCE_URL: "jdbc:h2:mem:shippingdb"
+  SPRING_DATASOURCE_DRIVER: "org.h2.Driver"
+  SPRING_JPA_HIBERNATE_DDL_AUTO: "create-drop"
+  SPRING_JPA_SHOW_SQL: "true"
+  EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE: "http://service-discovery:8761/eureka/"
+  SPRING_ZIPKIN_BASE_URL: "http://zipkin:9411/"
+  SPRING_CONFIG_IMPORT: "optional:configserver:http://cloud-config:9296"
+  SERVER_PORT: "8085"
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: shipping-service-secrets
+  namespace: ecommerce-shipping-dev
+  labels:
+    app: shipping-service
+type: Opaque
+data:
+  # Base64 encoded values
+  DB_USERNAME: dXNlcg==  # user
+  DB_PASSWORD: cGFzc3dvcmQ=  # password 
