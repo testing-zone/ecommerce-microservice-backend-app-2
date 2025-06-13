@@ -138,6 +138,3 @@ curl -f http://localhost:30920/_cluster/health
 - **Zipkin Documentation**: https://zipkin.io/
 - **Kubernetes Documentation**: https://kubernetes.io/docs/
 
-## Contacto y Soporte
-
-Para problemas específicos, consultar las guías de troubleshooting correspondientes o contactar al equipo de DevOps según los procedimientos de escalación definidos en la documentación.
