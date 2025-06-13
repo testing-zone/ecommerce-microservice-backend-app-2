@@ -1,0 +1,45 @@
+name: Generate Release Notes
+
+on:
+  push:
+    branches: [ master, dev, prod ]
+
+jobs:
+  release-notes:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+
+    - name: Generate release notes
+      id: release_notes
+      run: |
+        # Obtener el último tag o usar un hash si no hay tags
+        LAST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || git rev-list --max-parents=0 HEAD)
+        
+        # Generar notas de release
+        echo "## Release Notes - $(date '+%Y-%m-%d %H:%M:%S')" > release_notes.md
+        echo "" >> release_notes.md
+        echo "### Changes since last release:" >> release_notes.md
+        echo "" >> release_notes.md
+        
+        # Obtener commits desde el último tag
+        git log --oneline --pretty=format:"- %s" $LAST_TAG..HEAD >> release_notes.md
+        
+        # Mostrar el contenido
+        echo "Release notes generated:"
+        cat release_notes.md
+
+    - name: Create Release
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: v${{ github.run_number }}
+        release_name: Release v${{ github.run_number }}
+        body_path: release_notes.md
+        draft: false
+        prerelease: false
