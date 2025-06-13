@@ -1,0 +1,71 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: order-service-config
+  namespace: ecommerce-prod
+  labels:
+    app: order-service
+    version: v1
+    environment: production
+data:
+  application-prod.properties: |
+    # Order Service Production Configuration
+    server.port=8083
+    spring.application.name=order-service
+    spring.profiles.active=prod
+    
+    # Database Configuration (Production)
+    spring.datasource.url=jdbc:postgresql://postgres-orders:5432/orderdb
+    spring.datasource.driver-class-name=org.postgresql.Driver
+    spring.datasource.username=${DB_USERNAME:orderuser}
+    spring.datasource.password=${DB_PASSWORD:orderpass}
+    spring.jpa.hibernate.ddl-auto=validate
+    spring.jpa.show-sql=false
+    spring.jpa.database-platform=org.hibernate.dialect.PostgreSQLDialect
+    
+    # Connection Pool
+    spring.datasource.hikari.connection-timeout=20000
+    spring.datasource.hikari.maximum-pool-size=10
+    spring.datasource.hikari.minimum-idle=5
+    
+    # Eureka Configuration
+    eureka.client.service-url.defaultZone=http://service-discovery:8761/eureka/
+    eureka.client.register-with-eureka=true
+    eureka.client.fetch-registry=true
+    eureka.instance.prefer-ip-address=true
+    eureka.instance.hostname=${HOSTNAME:order-service}
+    eureka.instance.lease-renewal-interval-in-seconds=15
+    eureka.instance.lease-expiration-duration-in-seconds=45
+    
+    # Management Endpoints
+    management.endpoints.web.exposure.include=health,info,metrics,prometheus
+    management.endpoint.health.show-details=when-authorized
+    management.health.circuitbreakers.enabled=true
+    management.health.ratelimiters.enabled=true
+    management.metrics.export.prometheus.enabled=true
+    
+    # Logging
+    logging.level.com.ecommerce.order=INFO
+    logging.level.root=WARN
+    logging.pattern.console=%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n
+    
+    # Circuit Breaker (Production tuned)
+    resilience4j.circuitbreaker.instances.payment-service.slidingWindowSize=20
+    resilience4j.circuitbreaker.instances.payment-service.failureRateThreshold=30
+    resilience4j.circuitbreaker.instances.payment-service.waitDurationInOpenState=60000
+    resilience4j.circuitbreaker.instances.payment-service.permittedNumberOfCallsInHalfOpenState=5
+    
+    # Retry Configuration
+    resilience4j.retry.instances.payment-service.maxAttempts=3
+    resilience4j.retry.instances.payment-service.waitDuration=1000
+    
+    # Microservices URLs
+    microservices.user-service.url=http://user-service:8087
+    microservices.product-service.url=http://product-service:8082
+    microservices.payment-service.url=http://payment-service:8084
+    microservices.shipping-service.url=http://shipping-service:8085
+    
+    # Security
+    spring.security.enabled=true
+    jwt.secret=${JWT_SECRET:mySecretKey}
+    jwt.expiration=86400000 

@@ -3,57 +3,89 @@
 echo "🔍 VERIFICANDO PILA COMPLETA DE MONITOREO"
 echo "========================================="
 echo ""
+# Configuración de timeouts
+TIMEOUT_SECONDS=120  # 2 minutos
+RETRY_INTERVAL=5     # 5 segundos entre reintentos
 
-# Función para verificar el estado de un deployment
+# Función para verificar el estado de un deployment con timeout
 check_deployment() {
     local name=$1
     local namespace=$2
+    local start_time=$(date +%s)
     
-    if kubectl get deployment "$name" -n "$namespace" &>/dev/null; then
-        local ready=$(kubectl get deployment "$name" -n "$namespace" -o jsonpath='{.status.readyReplicas}' 2>/dev/null || echo "0")
-        local desired=$(kubectl get deployment "$name" -n "$namespace" -o jsonpath='{.spec.replicas}' 2>/dev/null || echo "1")
+    echo "⏳ Verificando deployment $name (timeout: ${TIMEOUT_SECONDS}s)..."
+    
+    while true; do
+        current_time=$(date +%s)
+        elapsed=$((current_time - start_time))
         
-        if [ "$ready" = "$desired" ] && [ "$ready" != "0" ]; then
-            echo "✅ $name: $ready/$desired pods ready"
-            return 0
-        else
-            echo "❌ $name: $ready/$desired pods ready"
+        if [ $elapsed -gt $TIMEOUT_SECONDS ]; then
+            echo "⏰ TIMEOUT: $name no estuvo listo en ${TIMEOUT_SECONDS} segundos"
+            echo "   💡 Ejecuta: kubectl describe deployment $name -n $namespace"
+            echo "   💡 Ver logs: kubectl logs -f deployment/$name -n $namespace"
             return 1
         fi
-    else
-        echo "❌ $name: No encontrado"
-        return 1
-    fi
+        
+        if kubectl get deployment "$name" -n "$namespace" &>/dev/null; then
+            local ready=$(kubectl get deployment "$name" -n "$namespace" -o jsonpath='{.status.readyReplicas}' 2>/dev/null || echo "0")
+            local desired=$(kubectl get deployment "$name" -n "$namespace" -o jsonpath='{.spec.replicas}' 2>/dev/null || echo "1")
+            
+            if [ "$ready" = "$desired" ] && [ "$ready" != "0" ]; then
+                echo "✅ $name: $ready/$desired pods ready (${elapsed}s)"
+                return 0
+            else
+                echo "⏳ $name: $ready/$desired pods ready (esperando... ${elapsed}s/${TIMEOUT_SECONDS}s)"
+                sleep $RETRY_INTERVAL
+            fi
+        else
+            echo "❌ $name: No encontrado en namespace $namespace"
+            return 1
+        fi
+    done
 }
 
-# Función para verificar servicio y conectividad
+# Función para verificar servicio y conectividad con timeout
 check_service() {
     local service_name=$1
     local namespace=$2
     local port=$3
     local path=${4:-"/"}
+    local start_time=$(date +%s)
     
-    if kubectl get service "$service_name" -n "$namespace" &>/dev/null; then
-        echo "✅ Servicio $service_name existe"
+    if ! kubectl get service "$service_name" -n "$namespace" &>/dev/null; then
+        echo "❌ Servicio $service_name no encontrado en namespace $namespace"
+        return 1
+    fi
+    
+    echo "✅ Servicio $service_name existe"
+    echo "⏳ Verificando conectividad en puerto $port (timeout: ${TIMEOUT_SECONDS}s)..."
+    
+    # Verificar conectividad usando port-forward en background
+    kubectl port-forward svc/"$service_name" "$port:$port" -n "$namespace" &>/dev/null &
+    local pf_pid=$!
+    sleep 3
+    
+    while true; do
+        current_time=$(date +%s)
+        elapsed=$((current_time - start_time))
         
-        # Verificar conectividad usando port-forward en background
-        kubectl port-forward svc/"$service_name" "$port:$port" -n "$namespace" &>/dev/null &
-        local pf_pid=$!
-        sleep 3
-        
-        if curl -s "http://localhost:$port$path" &>/dev/null; then
-            echo "✅ $service_name responde en puerto $port"
-            kill $pf_pid 2>/dev/null
-            return 0
-        else
-            echo "⚠️  $service_name no responde en puerto $port"
+        if [ $elapsed -gt $TIMEOUT_SECONDS ]; then
+            echo "⏰ TIMEOUT: $service_name no respondió en puerto $port después de ${TIMEOUT_SECONDS} segundos"
+            echo "   💡 Verificar: kubectl describe svc $service_name -n $namespace"
+            echo "   💡 Ver pods: kubectl get pods -n $namespace -l app=$service_name"
             kill $pf_pid 2>/dev/null
             return 1
         fi
-    else
-        echo "❌ Servicio $service_name no encontrado"
-        return 1
-    fi
+        
+        if curl -s --max-time 10 "http://localhost:$port$path" &>/dev/null; then
+            echo "✅ $service_name responde en puerto $port (${elapsed}s)"
+            kill $pf_pid 2>/dev/null
+            return 0
+        else
+            echo "⏳ Esperando respuesta de $service_name en puerto $port... (${elapsed}s/${TIMEOUT_SECONDS}s)"
+            sleep $RETRY_INTERVAL
+        fi
+    done
 }
 
 # Obtener IP de minikube
@@ -191,6 +223,13 @@ echo ""
 echo "   # Verificar métricas:"
 echo "   curl http://${MINIKUBE_IP}:30090/api/v1/targets"
 echo "   curl http://${MINIKUBE_IP}:30090/api/v1/query?query=up"
+
+echo ""
+echo "⚠️  14. SI HAY PROBLEMAS:"
+echo "   • Verificar recursos: kubectl top nodes"
+echo "   • Verificar eventos: kubectl get events -n monitoring --sort-by=.metadata.creationTimestamp"
+echo "   • Reiniciar deployment: kubectl rollout restart deployment/NOMBRE -n monitoring"
+echo "   • Verificar storage: kubectl get pv,pvc -n monitoring"
 
 echo ""
 echo "🎉 VERIFICACIÓN COMPLETADA!" 

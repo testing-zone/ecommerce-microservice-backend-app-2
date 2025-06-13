@@ -1,0 +1,112 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: payment-service
+  namespace: ecommerce
+  labels:
+    app: payment-service
+    version: v1
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: payment-service
+  template:
+    metadata:
+      labels:
+        app: payment-service
+        version: v1
+    spec:
+      containers:
+      - name: payment-service
+        image: payment-service-ecommerce:{{BUILD_NUMBER}}
+        imagePullPolicy: Never
+        ports:
+        - containerPort: 8084
+          name: http
+        env:
+        - name: SPRING_PROFILES_ACTIVE
+          value: "standalone"
+        - name: JAVA_OPTS
+          value: "-Xmx512m -Xms256m"
+        - name: EUREKA_CLIENT_ENABLED
+          value: "true"
+        - name: EUREKA_CLIENT_REGISTER_WITH_EUREKA
+          value: "true"
+        - name: EUREKA_CLIENT_FETCH_REGISTRY
+          value: "true"
+        - name: SPRING_CONFIG_IMPORT
+          value: "optional:configserver:"
+        - name: SPRING_ZIPKIN_ENABLED
+          value: "true"
+        - name: SPRING_ZIPKIN_BASE_URL
+          value: "http://zipkin:9411"
+        - name: STRIPE_API_KEY
+          valueFrom:
+            secretKeyRef:
+              name: payment-secrets
+              key: stripe-api-key
+              optional: true
+        - name: STRIPE_WEBHOOK_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: payment-secrets
+              key: stripe-webhook-secret
+              optional: true
+        - name: PAYPAL_CLIENT_ID
+          valueFrom:
+            secretKeyRef:
+              name: payment-secrets
+              key: paypal-client-id
+              optional: true
+        - name: PAYPAL_CLIENT_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: payment-secrets
+              key: paypal-client-secret
+              optional: true
+        volumeMounts:
+        - name: config-volume
+          mountPath: /home/app/config
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "250m"
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+        livenessProbe:
+          httpGet:
+            path: /actuator/health/liveness
+            port: 8084
+          initialDelaySeconds: 60
+          periodSeconds: 30
+          timeoutSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /actuator/health/readiness
+            port: 8084
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          timeoutSeconds: 5
+      volumes:
+      - name: config-volume
+        configMap:
+          name: payment-service-config
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: payment-service
+  namespace: ecommerce
+  labels:
+    app: payment-service
+spec:
+  type: ClusterIP
+  ports:
+  - port: 8084
+    targetPort: 8084
+    protocol: TCP
+    name: http
+  selector:
+    app: payment-service 

@@ -16,6 +16,17 @@ fi
 echo "✅ minikube funcionando"
 echo ""
 
+# Crear namespace ecommerce si no existe
+echo "🏗️  Verificando namespace 'ecommerce'..."
+if ! kubectl get namespace ecommerce &> /dev/null; then
+    echo "📦 Creando namespace 'ecommerce'..."
+    kubectl create namespace ecommerce
+    echo "✅ Namespace 'ecommerce' creado"
+else
+    echo "✅ Namespace 'ecommerce' ya existe"
+fi
+echo ""
+
 # Limpiar deployments existentes
 echo "🧹 Limpiando deployments anteriores..."
 kubectl delete deployment --all -n ecommerce >/dev/null 2>&1 || true

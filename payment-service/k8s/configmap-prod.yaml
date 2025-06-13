@@ -1,0 +1,50 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: payment-service-config
+  namespace: ecommerce-prod
+  labels:
+    app: payment-service
+    version: v1
+    environment: production
+data:
+  application-prod.properties: |
+    # Payment Service Production Configuration
+    server.port=8084
+    spring.application.name=payment-service
+    spring.profiles.active=prod
+    
+    # Database Configuration (Production)
+    spring.datasource.url=jdbc:postgresql://postgres-payments:5432/paymentdb
+    spring.datasource.driver-class-name=org.postgresql.Driver
+    spring.datasource.username=${DB_USERNAME:paymentuser}
+    spring.datasource.password=${DB_PASSWORD:paymentpass}
+    spring.jpa.hibernate.ddl-auto=validate
+    spring.jpa.show-sql=false
+    
+    # Eureka Configuration
+    eureka.client.service-url.defaultZone=http://service-discovery:8761/eureka/
+    eureka.client.register-with-eureka=true
+    eureka.client.fetch-registry=true
+    eureka.instance.prefer-ip-address=true
+    
+    # Management Endpoints
+    management.endpoints.web.exposure.include=health,info,metrics,prometheus
+    management.endpoint.health.show-details=when-authorized
+    
+    # Payment Gateway Configuration (Production)
+    payment.gateway.stripe.api-key=${STRIPE_API_KEY}
+    payment.gateway.stripe.webhook-secret=${STRIPE_WEBHOOK_SECRET}
+    payment.gateway.paypal.client-id=${PAYPAL_CLIENT_ID}
+    payment.gateway.paypal.client-secret=${PAYPAL_CLIENT_SECRET}
+    payment.gateway.timeout=30000
+    
+    # Circuit Breaker (Production tuned)
+    resilience4j.circuitbreaker.instances.stripe.slidingWindowSize=20
+    resilience4j.circuitbreaker.instances.stripe.failureRateThreshold=30
+    resilience4j.circuitbreaker.instances.stripe.waitDurationInOpenState=60000
+    
+    # Security
+    spring.security.enabled=true
+    jwt.secret=${JWT_SECRET}
+    jwt.expiration=86400000
