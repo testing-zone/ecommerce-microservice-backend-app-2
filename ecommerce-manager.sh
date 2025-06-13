@@ -8,6 +8,7 @@
 # - Componentes individuales  
 # - Verificaciones y diagnósticos
 # - Limpieza y organización
+# - Port-forwarding para acceso externo
 # ============================================================================
 
 PROJECT_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -80,6 +81,172 @@ check_prerequisites() {
     return 0
 }
 
+# Función para crear namespaces necesarios
+create_namespaces() {
+    echo "🏗️  Creando namespaces necesarios..."
+    
+    # Crear namespace ecommerce
+    if ! kubectl get namespace ecommerce &> /dev/null; then
+        echo "📦 Creando namespace 'ecommerce'..."
+        kubectl create namespace ecommerce
+        echo "✅ Namespace 'ecommerce' creado"
+    else
+        echo "✅ Namespace 'ecommerce' ya existe"
+    fi
+    
+    # Crear namespace monitoring
+    if ! kubectl get namespace monitoring &> /dev/null; then
+        echo "📊 Creando namespace 'monitoring'..."
+        kubectl create namespace monitoring
+        echo "✅ Namespace 'monitoring' creado"
+    else
+        echo "✅ Namespace 'monitoring' ya existe"
+    fi
+    
+    echo ""
+}
+
+# Función para configurar port-forwarding externo
+setup_external_port_forwarding() {
+    print_header
+    echo "🌐 CONFIGURANDO PORT-FORWARDING PARA ACCESO EXTERNO"
+    echo "============================================================================"
+    echo ""
+    
+    local minikube_ip=$(minikube ip 2>/dev/null || echo "N/A")
+    
+    if [[ $minikube_ip == "N/A" ]]; then
+        print_status "error" "Minikube no está ejecutándose"
+        return 1
+    fi
+    
+    echo "🔧 IP de Minikube: $minikube_ip"
+    echo ""
+    echo "Configurando port-forwarding para acceso desde fuera de la VM..."
+    echo ""
+    
+    # Detener port-forwards existentes
+    echo "🛑 Deteniendo port-forwards existentes..."
+    pkill -f "kubectl port-forward" 2>/dev/null || true
+    sleep 2
+    
+    echo "🚀 Iniciando port-forwards externos..."
+    
+    # Port-forward para microservicios (binding a 0.0.0.0 para acceso externo)
+    if kubectl get service proxy-client -n ecommerce &> /dev/null; then
+        echo "  📱 Proxy Client (Frontend) -> 0.0.0.0:8900"
+        kubectl port-forward svc/proxy-client 8900:8900 -n ecommerce --address=0.0.0.0 &
+        sleep 1
+    fi
+    
+    if kubectl get service api-gateway -n ecommerce &> /dev/null; then
+        echo "  🚪 API Gateway -> 0.0.0.0:8080"
+        kubectl port-forward svc/api-gateway 8080:8080 -n ecommerce --address=0.0.0.0 &
+        sleep 1
+    fi
+    
+    if kubectl get service service-discovery -n ecommerce &> /dev/null; then
+        echo "  🔍 Service Discovery -> 0.0.0.0:8761"
+        kubectl port-forward svc/service-discovery 8761:8761 -n ecommerce --address=0.0.0.0 &
+        sleep 1
+    fi
+    
+    # Port-forward para servicios individuales
+    local services=("user-service:8700:8087" "product-service:8500:8082" "order-service:8300:8083" "payment-service:8400:8084" "shipping-service:8600:8085" "favourite-service:8800:8086")
+    
+    for service_config in "${services[@]}"; do
+        IFS=':' read -r service local_port target_port <<< "$service_config"
+        if kubectl get service "$service" -n ecommerce &> /dev/null; then
+            echo "  🔧 $service -> 0.0.0.0:$local_port"
+            kubectl port-forward svc/"$service" "$local_port:$target_port" -n ecommerce --address=0.0.0.0 &
+            sleep 1
+        fi
+    done
+    
+    # Port-forward para servicios de monitoreo
+    echo ""
+    echo "📊 Configurando monitoreo..."
+    
+    local monitoring_services=("grafana:3000:3000" "prometheus:9090:9090" "kibana:5601:5601" "jaeger:16686:16686" "alertmanager:9093:9093")
+    
+    for service_config in "${monitoring_services[@]}"; do
+        IFS=':' read -r service local_port target_port <<< "$service_config"
+        if kubectl get service "$service" -n monitoring &> /dev/null; then
+            echo "  📈 $service -> 0.0.0.0:$local_port"
+            kubectl port-forward svc/"$service" "$local_port:$target_port" -n monitoring --address=0.0.0.0 &
+            sleep 1
+        fi
+    done
+    
+    sleep 3
+    
+    echo ""
+    echo "🎉 PORT-FORWARDING CONFIGURADO!"
+    echo "============================================================================"
+    echo ""
+    echo "🌐 URLs DE ACCESO EXTERNO (desde cualquier IP):"
+    echo ""
+    echo "🛍️  FRONTEND E-COMMERCE:"
+    echo "   Frontend Principal: http://$minikube_ip:8900/swagger-ui.html"
+    echo "   API Gateway:        http://$minikube_ip:8080"
+    echo "   Service Discovery:  http://$minikube_ip:8761"
+    echo ""
+    echo "🔧 MICROSERVICIOS INDIVIDUALES:"
+    echo "   User Service:       http://$minikube_ip:8700/actuator/health"
+    echo "   Product Service:    http://$minikube_ip:8500/actuator/health"
+    echo "   Order Service:      http://$minikube_ip:8300/actuator/health"
+    echo "   Payment Service:    http://$minikube_ip:8400/actuator/health"
+    echo "   Shipping Service:   http://$minikube_ip:8600/actuator/health"
+    echo "   Favourite Service:  http://$minikube_ip:8800/actuator/health"
+    echo ""
+    echo "📊 MONITOREO Y OBSERVABILIDAD:"
+    echo "   Grafana:            http://$minikube_ip:3000 (admin/admin123)"
+    echo "   Prometheus:         http://$minikube_ip:9090"
+    echo "   Kibana:             http://$minikube_ip:5601"
+    echo "   Jaeger:             http://$minikube_ip:16686"
+    echo "   AlertManager:       http://$minikube_ip:9093"
+    echo ""
+    echo "💡 NOTA: Estas URLs son accesibles desde cualquier dispositivo en la red"
+    echo "    que tenga acceso a la VM con IP: $minikube_ip"
+    echo ""
+    echo "🛑 Para detener port-forwards: pkill -f 'kubectl port-forward'"
+    echo ""
+    
+    # Guardar información de acceso
+    cat > "$PROJECT_ROOT/external-access-info.txt" << EOF
+# INFORMACIÓN DE ACCESO EXTERNO
+# Generado: $(date)
+# IP de Minikube: $minikube_ip
+
+## FRONTEND E-COMMERCE
+Frontend Principal: http://$minikube_ip:8900/swagger-ui.html
+API Gateway: http://$minikube_ip:8080
+Service Discovery: http://$minikube_ip:8761
+
+## MICROSERVICIOS
+User Service: http://$minikube_ip:8700/actuator/health
+Product Service: http://$minikube_ip:8500/actuator/health
+Order Service: http://$minikube_ip:8300/actuator/health
+Payment Service: http://$minikube_ip:8400/actuator/health
+Shipping Service: http://$minikube_ip:8600/actuator/health
+Favourite Service: http://$minikube_ip:8800/actuator/health
+
+## MONITOREO
+Grafana: http://$minikube_ip:3000 (admin/admin123)
+Prometheus: http://$minikube_ip:9090
+Kibana: http://$minikube_ip:5601
+Jaeger: http://$minikube_ip:16686
+AlertManager: http://$minikube_ip:9093
+
+# Para detener port-forwards: pkill -f 'kubectl port-forward'
+EOF
+    
+    echo "📄 Información guardada en: external-access-info.txt"
+    echo ""
+    echo "Presiona Enter para continuar..."
+    read
+}
+
 check_services_status() {
     print_header
     echo "📊 ESTADO ACTUAL DE SERVICIOS"
@@ -95,6 +262,21 @@ check_services_status() {
     fi
     echo ""
     
+    # Verificar namespaces
+    echo "🏗️  Namespaces:"
+    if kubectl get namespace ecommerce &> /dev/null; then
+        echo "  ✅ ecommerce: Existe"
+    else
+        echo "  ❌ ecommerce: No existe"
+    fi
+    
+    if kubectl get namespace monitoring &> /dev/null; then
+        echo "  ✅ monitoring: Existe"
+    else
+        echo "  ❌ monitoring: No existe"
+    fi
+    echo ""
+    
     # Verificar Jenkins
     echo "🔍 Jenkins:"
     if curl -s http://localhost:8081 &> /dev/null; then
@@ -106,7 +288,7 @@ check_services_status() {
     
     # Verificar microservicios
     echo "🔍 Microservicios (namespace: ecommerce):"
-    local services=("user-service" "product-service" "order-service" "payment-service" "shipping-service" "favourite-service")
+    local services=("user-service" "product-service" "order-service" "payment-service" "shipping-service" "favourite-service" "proxy-client" "api-gateway" "service-discovery")
     for service in "${services[@]}"; do
         local status=$(kubectl get pod -l app=$service -n ecommerce --no-headers 2>/dev/null | awk '{print $3}' | head -1)
         if [[ $status == "Running" ]]; then
@@ -134,6 +316,19 @@ check_services_status() {
     done
     echo ""
     
+    # Verificar port-forwards activos
+    echo "🌐 Port-forwards activos:"
+    local pf_count=$(ps aux | grep -c "kubectl port-forward" | grep -v grep || echo "0")
+    if [ "$pf_count" -gt 0 ]; then
+        echo "  ✅ $pf_count port-forward(s) activo(s)"
+        ps aux | grep "kubectl port-forward" | grep -v grep | while read line; do
+            echo "    🔗 $(echo $line | awk '{for(i=11;i<=NF;i++) printf "%s ", $i; print ""}')"
+        done
+    else
+        echo "  ❌ No hay port-forwards activos"
+    fi
+    echo ""
+    
     echo "Presiona Enter para continuar..."
     read
 }
@@ -152,12 +347,17 @@ show_access_urls() {
     
     echo "🛍️  MICROSERVICIOS E-COMMERCE:"
     if [[ $minikube_ip != "N/A" ]]; then
-        echo "   user-service: http://$minikube_ip:30087"
-        echo "   product-service: http://$minikube_ip:30082"
-        echo "   order-service: http://$minikube_ip:30083"
-        echo "   payment-service: http://$minikube_ip:30084"
-        echo "   shipping-service: http://$minikube_ip:30085"
-        echo "   favourite-service: http://$minikube_ip:30086"
+        echo "   Frontend (Swagger UI): http://$minikube_ip:8900/swagger-ui.html"
+        echo "   API Gateway:           http://$minikube_ip:8080"
+        echo "   Service Discovery:     http://$minikube_ip:8761"
+        echo ""
+        echo "   Servicios individuales:"
+        echo "   user-service:          http://$minikube_ip:8700"
+        echo "   product-service:       http://$minikube_ip:8500"
+        echo "   order-service:         http://$minikube_ip:8300"
+        echo "   payment-service:       http://$minikube_ip:8400"
+        echo "   shipping-service:      http://$minikube_ip:8600"
+        echo "   favourite-service:     http://$minikube_ip:8800"
     else
         echo "   ❌ Minikube no está corriendo"
     fi
@@ -165,18 +365,18 @@ show_access_urls() {
     
     echo "📊 SERVICIOS DE MONITOREO:"
     if [[ $minikube_ip != "N/A" ]]; then
-        echo "   Grafana: http://$minikube_ip:30030 (admin/admin123)"
-        echo "   Prometheus: http://$minikube_ip:30090"
-        echo "   Kibana: http://$minikube_ip:30601"
-        echo "   Jaeger: http://$minikube_ip:30686"
-        echo "   AlertManager: http://$minikube_ip:30093"
+        echo "   Grafana:        http://$minikube_ip:3000 (admin/admin123)"
+        echo "   Prometheus:     http://$minikube_ip:9090"
+        echo "   Kibana:         http://$minikube_ip:5601"
+        echo "   Jaeger:         http://$minikube_ip:16686"
+        echo "   AlertManager:   http://$minikube_ip:9093"
     else
         echo "   ❌ Minikube no está corriendo"
     fi
     echo ""
     
-    if [ -f "$PROJECT_ROOT/monitoring-tunnels.log" ]; then
-        echo "📋 URLs dinámicas de túneles: monitoring-tunnels.log"
+    if [ -f "$PROJECT_ROOT/external-access-info.txt" ]; then
+        echo "📋 Información detallada de acceso: external-access-info.txt"
         echo ""
     fi
     
@@ -190,9 +390,11 @@ deploy_complete() {
     echo "============================================================================"
     echo ""
     echo "Esto desplegará:"
+    echo "  • Namespaces necesarios (ecommerce, monitoring)"
     echo "  • Jenkins CI/CD"
     echo "  • 6 Microservicios de E-commerce"
     echo "  • Stack completo de Monitoreo"
+    echo "  • Port-forwarding para acceso externo"
     echo "  • Tests de Performance"
     echo "  • Generación de datos de prueba"
     echo ""
@@ -205,13 +407,37 @@ deploy_complete() {
         return 0
     fi
     
-    # Ejecutar pipeline completo
-    if [ -f "$PROJECT_ROOT/pipeline/master-deployment-pipeline.sh" ]; then
-        chmod +x "$PROJECT_ROOT/pipeline/master-deployment-pipeline.sh"
-        bash "$PROJECT_ROOT/pipeline/master-deployment-pipeline.sh"
+    # Crear namespaces primero
+    create_namespaces
+    
+    # Ejecutar despliegue de microservicios
+    echo "📦 Desplegando microservicios..."
+    if [ -f "$PROJECT_ROOT/DEPLOY_ALL_MICROSERVICES.sh" ]; then
+        chmod +x "$PROJECT_ROOT/DEPLOY_ALL_MICROSERVICES.sh"
+        bash "$PROJECT_ROOT/DEPLOY_ALL_MICROSERVICES.sh"
     else
-        print_status "error" "Pipeline maestro no encontrado"
+        print_status "error" "Script DEPLOY_ALL_MICROSERVICES.sh no encontrado"
+        return 1
     fi
+    
+    # Ejecutar despliegue de monitoreo
+    echo "📊 Desplegando stack de monitoreo..."
+    if [ -f "$PROJECT_ROOT/deploy-monitoring.sh" ]; then
+        chmod +x "$PROJECT_ROOT/deploy-monitoring.sh"
+        bash "$PROJECT_ROOT/deploy-monitoring.sh"
+    else
+        print_status "warning" "Script deploy-monitoring.sh no encontrado, saltando monitoreo"
+    fi
+    
+    # Esperar a que los pods estén listos
+    echo "⏱️  Esperando que los servicios estén listos..."
+    sleep 30
+    
+    # Configurar port-forwarding externo
+    echo "🌐 Configurando acceso externo..."
+    setup_external_port_forwarding
+    
+    print_status "success" "Despliegue completo finalizado"
     
     echo ""
     echo "Presiona Enter para continuar..."
@@ -241,10 +467,21 @@ deploy_microservices_only() {
     echo "🛍️  DESPLIEGUE SOLO DE MICROSERVICIOS"
     echo "============================================================================"
     
-    if [ -f "$PROJECT_ROOT/pipeline/DEPLOY_ALL_MICROSERVICES.sh" ]; then
-        chmod +x "$PROJECT_ROOT/pipeline/DEPLOY_ALL_MICROSERVICES.sh"
-        bash "$PROJECT_ROOT/pipeline/DEPLOY_ALL_MICROSERVICES.sh"
+    # Crear namespace ecommerce primero
+    create_namespaces
+    
+    if [ -f "$PROJECT_ROOT/DEPLOY_ALL_MICROSERVICES.sh" ]; then
+        chmod +x "$PROJECT_ROOT/DEPLOY_ALL_MICROSERVICES.sh"
+        bash "$PROJECT_ROOT/DEPLOY_ALL_MICROSERVICES.sh"
         print_status "success" "Microservicios desplegados"
+        
+        # Configurar port-forwarding para microservicios
+        echo ""
+        read -p "¿Configurar port-forwarding para acceso externo? [Y/n]: " -n 1 -r
+        echo ""
+        if [[ ! $REPLY =~ ^[Nn]$ ]]; then
+            setup_external_port_forwarding
+        fi
     else
         print_status "error" "Script DEPLOY_ALL_MICROSERVICES.sh no encontrado"
     fi
@@ -259,16 +496,27 @@ deploy_monitoring_only() {
     echo "📊 DESPLIEGUE SOLO DE MONITOREO"
     echo "============================================================================"
     
-    if [ -f "$PROJECT_ROOT/pipeline/deploy-monitoring.sh" ]; then
-        chmod +x "$PROJECT_ROOT/pipeline/deploy-monitoring.sh"
-        bash "$PROJECT_ROOT/pipeline/deploy-monitoring.sh"
+    # Crear namespace monitoring primero
+    create_namespaces
+    
+    if [ -f "$PROJECT_ROOT/deploy-monitoring.sh" ]; then
+        chmod +x "$PROJECT_ROOT/deploy-monitoring.sh"
+        bash "$PROJECT_ROOT/deploy-monitoring.sh"
         
-        # Aplicar NodePorts
+        # Aplicar NodePorts si existen
         if [ -f "$PROJECT_ROOT/monitoring/monitoring-nodeports.yaml" ]; then
             kubectl apply -f "$PROJECT_ROOT/monitoring/monitoring-nodeports.yaml"
         fi
         
         print_status "success" "Stack de monitoreo desplegado"
+        
+        # Configurar port-forwarding para monitoreo
+        echo ""
+        read -p "¿Configurar port-forwarding para acceso externo? [Y/n]: " -n 1 -r
+        echo ""
+        if [[ ! $REPLY =~ ^[Nn]$ ]]; then
+            setup_external_port_forwarding
+        fi
     else
         print_status "error" "Script deploy-monitoring.sh no encontrado"
     fi
@@ -394,6 +642,7 @@ stop_all_services() {
     echo "  • Jenkins (Docker)"
     echo "  • Minikube (Kubernetes)"
     echo "  • Túneles de monitoreo"
+    echo "  • Port-forwards activos"
     echo ""
     
     read -p "¿Continuar? [y/N]: " -n 1 -r
@@ -408,10 +657,30 @@ stop_all_services() {
     echo "Deteniendo túneles de monitoreo..."
     pkill -f "minikube service" 2>/dev/null || true
     
+    echo "Deteniendo port-forwards..."
+    pkill -f "kubectl port-forward" 2>/dev/null || true
+    
     echo "Deteniendo minikube..."
     minikube stop
     
     print_status "success" "Todos los servicios detenidos"
+    
+    echo ""
+    echo "Presiona Enter para continuar..."
+    read
+}
+
+# Función para detener solo port-forwards
+stop_port_forwards() {
+    print_header
+    echo "🛑 DETENER PORT-FORWARDS"
+    echo "============================================================================"
+    
+    echo "Deteniendo todos los port-forwards activos..."
+    pkill -f "kubectl port-forward" 2>/dev/null || true
+    sleep 2
+    
+    print_status "success" "Port-forwards detenidos"
     
     echo ""
     echo "Presiona Enter para continuar..."
@@ -432,19 +701,23 @@ show_menu() {
     echo "  5) Solo Microservicios"
     echo "  6) Solo Monitoreo"
     echo ""
+    echo "🌐 ACCESO EXTERNO:"
+    echo "  7) Configurar Port-Forwarding externo"
+    echo "  8) Detener Port-Forwarding"
+    echo ""
     echo "⚡ OPERACIONES:"
-    echo "  7) Generar datos de monitoreo"
-    echo "  8) Ejecutar tests de performance"
-    echo "  9) Exponer servicios de monitoreo"
+    echo "  9) Generar datos de monitoreo"
+    echo " 10) Ejecutar tests de performance"
+    echo " 11) Exponer servicios de monitoreo (Legacy)"
     echo ""
     echo "🛠️  MANTENIMIENTO:"
-    echo " 10) Limpiar y organizar proyecto"
-    echo " 11) Detener todos los servicios"
+    echo " 12) Limpiar y organizar proyecto"
+    echo " 13) Detener todos los servicios"
     echo ""
     echo "  0) Salir"
     echo ""
     echo "============================================================================"
-    printf "Opción [0-11]: "
+    printf "Opción [0-13]: "
 }
 
 main() {
@@ -468,16 +741,19 @@ main() {
             4) deploy_jenkins_only ;;
             5) deploy_microservices_only ;;
             6) deploy_monitoring_only ;;
-            7) generate_monitoring_data ;;
-            8) run_performance_tests ;;
-            9) expose_monitoring_services ;;
-            10) clean_project ;;
-            11) stop_all_services ;;
+            7) setup_external_port_forwarding ;;
+            8) stop_port_forwards ;;
+            9) generate_monitoring_data ;;
+            10) run_performance_tests ;;
+            11) expose_monitoring_services ;;
+            12) clean_project ;;
+            13) stop_all_services ;;
             0) 
                 print_header
                 echo "¡Hasta luego!"
                 echo ""
                 echo "📄 Logs disponibles en: $LOG_FILE"
+                echo "📄 Acceso externo en: external-access-info.txt"
                 echo ""
                 exit 0
                 ;;
