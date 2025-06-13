@@ -7,8 +7,7 @@ Esta carpeta contiene la documentación técnica completa del sistema de microse
 ## Estructura de Documentación
 
 ### Documentación de Arquitectura
-- **[PATRONES_ARQUITECTURA.md](PATRONES_ARQUITECTURA.md)** - Análisis exhaustivo de los 14 patrones de diseño en la nube implementados
-- **[ARCHITECTURE_PATTERNS.md](ARCHITECTURE_PATTERNS.md)** - Versión en inglés de la documentación de patrones
+- **[PATRONES_ARQUITECTURA.md](PATRONES_ARQUITECTURA.md)** - 14 patrones de diseño en la nube implementados
 
 ### Documentación de Monitoreo
 - **[TROUBLESHOOTING_MONITOREO.md](TROUBLESHOOTING_MONITOREO.md)** - Guía completa de troubleshooting para el stack de monitoreo
