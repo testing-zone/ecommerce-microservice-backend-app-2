@@ -1,7 +1,0 @@
-[2025-05-30 12:28:26,755] Svaks-MacBook-Pro-2/INFO/locust.main: Starting Locust 2.37.6
-[2025-05-30 12:28:26,756] Svaks-MacBook-Pro-2/INFO/locust.main: Run time limit set to 120 seconds
-[2025-05-30 12:28:26,756] Svaks-MacBook-Pro-2/INFO/locust.runners: Ramping to 200 users at a rate of 20.00 per second
-[2025-05-30 12:29:00,254] Svaks-MacBook-Pro-2/INFO/locust.runners: All users spawned: {"StressTest": 200} (200 total users)
-[2025-05-30 12:30:26,483] Svaks-MacBook-Pro-2/INFO/locust.main: --run-time limit reached, shutting down
-[2025-05-30 12:30:26,553] Svaks-MacBook-Pro-2/INFO/locust.main: writing html report to file: ../../../performance-reports/20250530_122012/stress-test-report.html
-[2025-05-30 12:30:26,556] Svaks-MacBook-Pro-2/INFO/locust.main: Shutting down (exit code 1)
