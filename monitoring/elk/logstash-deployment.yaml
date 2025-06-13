@@ -1,0 +1,251 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: logstash-config
+  namespace: monitoring
+data:
+  logstash.yml: |
+    http.host: "0.0.0.0"
+    path.config: /usr/share/logstash/pipeline
+    xpack.monitoring.enabled: false
+    
+  logstash.conf: |
+    input {
+      beats {
+        port => 5044
+      }
+      http {
+        port => 8080
+        codec => json
+      }
+      # Input directo desde aplicaciones Spring Boot
+      tcp {
+        port => 5000
+        codec => json_lines
+      }
+    }
+    
+    filter {
+      # Filtros para logs de Spring Boot
+      if [fields][service] {
+        mutate {
+          add_field => { "service_name" => "%{[fields][service]}" }
+        }
+      }
+      
+      # Parse de logs de Spring Boot
+      if [message] =~ /^\d{4}-\d{2}-\d{2}/ {
+        grok {
+          match => { 
+            "message" => "%{TIMESTAMP_ISO8601:timestamp} %{LOGLEVEL:level} %{NUMBER:pid} --- \[%{DATA:thread}\] %{DATA:logger} : %{GREEDYDATA:log_message}" 
+          }
+        }
+        
+        date {
+          match => [ "timestamp", "yyyy-MM-dd HH:mm:ss.SSS" ]
+        }
+      }
+      
+      # Enriquecer con información del servicio
+      if [service_name] == "user-service" {
+        mutate {
+          add_field => { "service_type" => "business" }
+          add_field => { "service_category" => "user_management" }
+        }
+      } else if [service_name] == "product-service" {
+        mutate {
+          add_field => { "service_type" => "business" }
+          add_field => { "service_category" => "catalog" }
+        }
+      } else if [service_name] == "order-service" {
+        mutate {
+          add_field => { "service_type" => "business" }
+          add_field => { "service_category" => "transaction" }
+        }
+      } else if [service_name] == "payment-service" {
+        mutate {
+          add_field => { "service_type" => "business" }
+          add_field => { "service_category" => "transaction" }
+        }
+      } else if [service_name] == "shipping-service" {
+        mutate {
+          add_field => { "service_type" => "business" }
+          add_field => { "service_category" => "fulfillment" }
+        }
+      } else if [service_name] == "favourite-service" {
+        mutate {
+          add_field => { "service_type" => "business" }
+          add_field => { "service_category" => "user_preference" }
+        }
+      } else if [service_name] == "api-gateway" {
+        mutate {
+          add_field => { "service_type" => "infrastructure" }
+          add_field => { "service_category" => "gateway" }
+        }
+      } else if [service_name] == "service-discovery" {
+        mutate {
+          add_field => { "service_type" => "infrastructure" }
+          add_field => { "service_category" => "discovery" }
+        }
+      } else if [service_name] == "proxy-client" {
+        mutate {
+          add_field => { "service_type" => "infrastructure" }
+          add_field => { "service_category" => "aggregator" }
+        }
+      }
+      
+      # Detectar errores y excepciones
+      if [level] == "ERROR" or [log_message] =~ /Exception|Error/ {
+        mutate {
+          add_field => { "alert_level" => "high" }
+          add_tag => [ "error" ]
+        }
+      } else if [level] == "WARN" {
+        mutate {
+          add_field => { "alert_level" => "medium" }
+          add_tag => [ "warning" ]
+        }
+      }
+      
+      # Detectar métricas de performance
+      if [log_message] =~ /took \d+ms/ {
+        grok {
+          match => { "log_message" => "took %{NUMBER:response_time_ms}ms" }
+        }
+        mutate {
+          convert => { "response_time_ms" => "integer" }
+          add_tag => [ "performance" ]
+        }
+      }
+    }
+    
+    output {
+      elasticsearch {
+        hosts => ["elasticsearch:9200"]
+        index => "ecommerce-logs-%{+YYYY.MM.dd}"
+        template_name => "ecommerce-logs"
+        template_pattern => "ecommerce-logs-*"
+        template => {
+          "index_patterns" => ["ecommerce-logs-*"]
+          "settings" => {
+            "number_of_shards" => 1
+            "number_of_replicas" => 0
+          }
+          "mappings" => {
+            "properties" => {
+              "@timestamp" => { "type" => "date" }
+              "service_name" => { "type" => "keyword" }
+              "service_type" => { "type" => "keyword" }
+              "service_category" => { "type" => "keyword" }
+              "level" => { "type" => "keyword" }
+              "log_message" => { "type" => "text" }
+              "response_time_ms" => { "type" => "integer" }
+              "alert_level" => { "type" => "keyword" }
+            }
+          }
+        }
+      }
+      
+      # Debug output
+      stdout { 
+        codec => rubydebug 
+      }
+    }
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: logstash
+  namespace: monitoring
+  labels:
+    app: logstash
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: logstash
+  template:
+    metadata:
+      labels:
+        app: logstash
+    spec:
+      containers:
+      - name: logstash
+        image: docker.elastic.co/logstash/logstash:8.8.0
+        ports:
+        - containerPort: 5044
+          name: beats
+        - containerPort: 8080
+          name: http
+        - containerPort: 5000
+          name: tcp
+        - containerPort: 9600
+          name: monitoring
+        env:
+        - name: LS_JAVA_OPTS
+          value: "-Xmx512m -Xms512m"
+        resources:
+          requests:
+            memory: "1Gi"
+            cpu: "500m"
+          limits:
+            memory: "2Gi"
+            cpu: "1000m"
+        volumeMounts:
+        - name: logstash-config
+          mountPath: /usr/share/logstash/config/logstash.yml
+          subPath: logstash.yml
+        - name: logstash-pipeline
+          mountPath: /usr/share/logstash/pipeline/logstash.conf
+          subPath: logstash.conf
+        livenessProbe:
+          httpGet:
+            path: /
+            port: 9600
+          initialDelaySeconds: 60
+          periodSeconds: 30
+        readinessProbe:
+          httpGet:
+            path: /
+            port: 9600
+          initialDelaySeconds: 30
+          periodSeconds: 10
+      volumes:
+      - name: logstash-config
+        configMap:
+          name: logstash-config
+      - name: logstash-pipeline
+        configMap:
+          name: logstash-config
+          
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: logstash
+  namespace: monitoring
+  labels:
+    app: logstash
+spec:
+  type: ClusterIP
+  ports:
+  - port: 5044
+    targetPort: 5044
+    protocol: TCP
+    name: beats
+  - port: 8080
+    targetPort: 8080
+    protocol: TCP
+    name: http
+  - port: 5000
+    targetPort: 5000
+    protocol: TCP
+    name: tcp
+  - port: 9600
+    targetPort: 9600
+    protocol: TCP
+    name: monitoring
+  selector:
+    app: logstash 

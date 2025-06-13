@@ -1,0 +1,25 @@
+# INFORMACIÓN DE ACCESO EXTERNO
+# Generado: Fri Jun 13 16:23:37 -05 2025
+# IP de Minikube: 192.168.49.2
+
+## FRONTEND E-COMMERCE
+Frontend Principal: http://192.168.49.2:8900/swagger-ui.html
+API Gateway: http://192.168.49.2:8080
+Service Discovery: http://192.168.49.2:8761
+
+## MICROSERVICIOS
+User Service: http://192.168.49.2:8700/actuator/health
+Product Service: http://192.168.49.2:8500/actuator/health
+Order Service: http://192.168.49.2:8300/actuator/health
+Payment Service: http://192.168.49.2:8400/actuator/health
+Shipping Service: http://192.168.49.2:8600/actuator/health
+Favourite Service: http://192.168.49.2:8800/actuator/health
+
+## MONITOREO
+Grafana: http://192.168.49.2:3000 (admin/admin123)
+Prometheus: http://192.168.49.2:9090
+Kibana: http://192.168.49.2:5601
+Jaeger: http://192.168.49.2:16686
+AlertManager: http://192.168.49.2:9093
+
+# Para detener port-forwards: pkill -f 'kubectl port-forward'

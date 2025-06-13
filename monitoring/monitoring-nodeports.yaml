@@ -44,6 +44,40 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
+  name: elasticsearch
+  namespace: monitoring
+spec:
+  type: NodePort
+  ports:
+    - port: 9200
+      targetPort: 9200
+      nodePort: 30920
+      name: http
+  selector:
+    app: elasticsearch
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: logstash
+  namespace: monitoring
+spec:
+  type: NodePort
+  ports:
+    - port: 5000
+      targetPort: 5000
+      nodePort: 30500
+      name: tcp
+    - port: 8080
+      targetPort: 8080
+      nodePort: 30580
+      name: http
+  selector:
+    app: logstash
+---
+apiVersion: v1
+kind: Service
+metadata:
   name: jaeger
   namespace: monitoring
 spec:
