@@ -14,6 +14,7 @@ output "internal_ip" {
   value = google_compute_instance.microservices_vm.network_interface[0].network_ip
 }
 
-output "ssh_command" {
-  value = "ssh -i ${var.ssh_public_key_path} ${var.ssh_user}@${google_compute_instance.microservices_vm.network_interface[0].access_config[0].nat_ip}"
+output "vm_connection_info" {
+  value = "Connect to VM: ${var.vm_username}@${google_compute_instance.microservices_vm.network_interface[0].access_config[0].nat_ip}"
+  description = "VM connection information with username"
 }

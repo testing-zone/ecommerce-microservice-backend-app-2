@@ -3,7 +3,11 @@ terraform {
   required_providers {
     google = {
       source  = "hashicorp/google"
-      version = "~> 4.0"
+      version = "~> 5.0"
+    }
+    random = {
+      source  = "hashicorp/random"
+      version = "~> 3.4"
     }
   }
 }
@@ -31,6 +35,12 @@ locals {
   ]
 }
 
+# Generate random password for VM access
+resource "random_password" "vm_password" {
+  length  = 16
+  special = true
+}
+
 module "network" {
   source       = "../../modules/network"
   network_name = "${local.environment}-vpc"
@@ -52,8 +62,8 @@ module "microservices_vm" {
   network_id           = module.network.network_id
   subnet_id            = module.network.subnet_id
   
-  ssh_user             = var.ssh_user
-  ssh_public_key_path  = var.ssh_public_key_path
+  vm_username          = var.vm_username
+  vm_password          = random_password.vm_password.result
   
   microservices        = local.microservices
   

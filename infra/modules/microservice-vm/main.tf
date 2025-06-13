@@ -10,20 +10,25 @@ resource "google_compute_instance" "microservices_vm" {
       type  = var.disk_type
     }
   }
-
   network_interface {
     network    = var.network_id
     subnetwork = var.subnet_id
     
     access_config {
+      # Ephemeral public IP
     }
   }
 
   metadata = {
-    ssh-keys = "${var.ssh_user}:${file(var.ssh_public_key_path)}"
-    startup-script = templatefile("${path.module}/startup.sh", {
+    # Completely disable OS Login to use local users
+    enable-oslogin = "FALSE"
+    block-project-ssh-keys = "TRUE"
+    
+    # Configure startup script that sets up user and password
+    startup-script = templatefile("${path.module}/startup-password.sh", {
       microservices = var.microservices
-      ssh_user      = var.ssh_user
+      username      = var.vm_username
+      password      = var.vm_password
     })
   }
 

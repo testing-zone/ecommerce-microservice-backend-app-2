@@ -42,21 +42,22 @@ variable "subnet_id" {
   description = "Subnet ID"
 }
 
-variable "ssh_user" {
+variable "vm_username" {
   type        = string
-  description = "SSH username"
-  default     = "terraform-user"
+  description = "VM username for password authentication"
+  default     = "vmuser"
 }
 
-variable "ssh_public_key_path" {
+variable "vm_password" {
   type        = string
-  description = "Path to SSH public key"
+  description = "VM password for authentication"
+  sensitive   = true
 }
 
 variable "network_tags" {
   type        = list(string)
   description = "Network tags for firewall rules"
-  default     = ["ssh-enabled", "http-server", "https-server", "microservices"]
+  default     = ["ssh-enabled", "http-server", "https-server", "microservices", "rdp-enabled"]
 }
 
 variable "labels" {

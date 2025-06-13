@@ -21,20 +21,15 @@ variable "subnet_cidr" {
   default     = "10.0.0.0/24"
 }
 
-variable "ssh_user" {
+variable "vm_username" {
   type        = string
-  description = "SSH username"
-  default     = "terraform-user"
-}
-
-variable "ssh_public_key_path" {
-  type        = string
-  description = "Path to SSH public key"
+  description = "VM username for password authentication"
+  default     = "devuser"
 }
 
 variable "ssh_allowed_ips" {
   type        = list(string)
-  description = "IPs allowed to SSH (usar tu IP para mayor seguridad)"
+  description = "IPs allowed to access VM"
   default     = ["0.0.0.0/0"]
 }
 
